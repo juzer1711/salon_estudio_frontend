@@ -22,3 +22,4 @@ Aplicaci√≥n SPA desarrollada con React + Vite + TypeScript, siguiendo buenas pr√
 git clone <TU_REPO>
 cd salon-estudio
 npm install
+ 
