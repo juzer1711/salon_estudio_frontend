@@ -1,16 +1,13 @@
-import { Link } from 'react-router-dom';
+import Navbar from '../components/Links'; 
+
 export default function Login() {
   return (
-    <main className="p-6">
-        <nav className="mt-4 flex gap-2">
-        <Link to="/login">Login</Link>
-        <Link to="/register">Register</Link>
-        <Link to="/dashboard">Dashboard</Link>
-        <Link to="/profile">Profile</Link>
-        <Link to="/room/123">Room</Link>
-        </nav>
-      <h1 className="text-2xl font-bold">Iniciar sesión</h1>
-      <p>Vista temporal para configuración de rutas.</p>
-    </main>
+    <>
+      <Navbar /> 
+      <main className="p-6">
+        <h1 className="text-2xl font-bold">inicio sesion</h1>
+        <p>Contenido de la página de inicio sesion.</p>
+      </main>
+    </>
   );
 }
