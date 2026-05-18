@@ -1,30 +1,21 @@
-import { useState } from "react";
-
+import React, { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
-type InputProps = {
-  type?: string;
-  placeholder?: string;
-};
+export type InputProps =
+  React.InputHTMLAttributes<HTMLInputElement>;
 
 export default function Input({
   type = "text",
-  placeholder,
+  ...props
 }: InputProps) {
-
   const [showPassword, setShowPassword] = useState(false);
 
   const isPassword = type === "password";
 
   return (
-
-    <div
-      style={{
-        position: "relative",
-      }}
-    >
-
+    <div style={{ position: "relative" }}>
       <input
+        {...props}
         type={
           isPassword
             ? showPassword
@@ -32,7 +23,6 @@ export default function Input({
               : "password"
             : type
         }
-        placeholder={placeholder}
         style={{
           width: "100%",
           padding: "12px 14px",
@@ -47,7 +37,6 @@ export default function Input({
       />
 
       {isPassword && (
-
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
@@ -65,18 +54,13 @@ export default function Input({
             justifyContent: "center",
           }}
         >
-
-          {
-            showPassword
-              ? <FiEyeOff size={18} />
-              : <FiEye size={18} />
-          }
-
+          {showPassword ? (
+            <FiEyeOff size={18} />
+          ) : (
+            <FiEye size={18} />
+          )}
         </button>
-
       )}
-
     </div>
-
   );
 }

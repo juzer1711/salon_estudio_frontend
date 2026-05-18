@@ -1,16 +1,18 @@
+import React from "react";
 import { FcGoogle } from "react-icons/fc";
 
-type GoogleButtonProps = {
-  text: string;
-};
+export type GoogleButtonProps =
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    text: string;
+  };
 
 export default function GoogleButton({
   text,
+  ...props
 }: GoogleButtonProps) {
-
   return (
-
     <button
+      {...props}
       style={{
         width: "100%",
         padding: "12px",
@@ -21,19 +23,14 @@ export default function GoogleButton({
         fontSize: "14px",
         fontWeight: "600",
         cursor: "pointer",
-
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         gap: "10px",
       }}
     >
-
       <FcGoogle size={20} />
-
       {text}
-
     </button>
-
   );
 }

@@ -1,161 +1,80 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 import AuthLayout from "../../layouts/AuthLayout";
-
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import GoogleButton from "../../components/ui/GoogleButton";
 
+import { useAuthStore } from "../../store/useAuthStore";
+
 export default function Login() {
+  const navigate = useNavigate();
+
+  const { loginWithEmail, loginWithGoogle, error } = useAuthStore();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    const success = await loginWithEmail(email, password);
+    if (success) navigate("/dashboard");
+  };
+
+  const handleGoogle = async () => {
+    const success = await loginWithGoogle();
+    if (success) navigate("/dashboard");
+  };
 
   return (
-
     <AuthLayout>
-
       {/* HEADER */}
 
-      <div
-        style={{
-          textAlign: "center",
-          marginBottom: "32px",
-        }}
-      >
-
-        <h1
-          style={{
-            fontSize: "38px",
-            fontWeight: "800",
-            color: "white",
-          }}
-        >
-          Roomix
-        </h1>
-
-        <p
-          style={{
-            marginTop: "14px",
-            color: "#94A3B8",
-            fontSize: "14px",
-            lineHeight: "22px",
-          }}
-        >
-          Colabora, estudia y conecta
-          con tu equipo en tiempo real.
-        </p>
-
-      </div>
-
       {/* EMAIL */}
-
       <div style={{ marginBottom: "22px" }}>
-
-        <label
-          style={{
-            display: "block",
-            marginBottom: "10px",
-            color: "white",
-            fontWeight: "600",
-          }}
-        >
-          Correo electrónico
-        </label>
-
+        <label>Correo electrónico</label>
         <Input
           type="email"
           placeholder="Ingresa tu correo"
+          value={email}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setEmail(e.target.value)
+          }
         />
-
       </div>
 
       {/* PASSWORD */}
-
       <div style={{ marginBottom: "28px" }}>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: "10px",
-          }}
-        >
-
-          <label
-            style={{
-              color: "white",
-              fontWeight: "600",
-            }}
-          >
-            Contraseña
-          </label>
-
-          <Link
-            to="/forgot-password"
-            style={{
-              color: "#7C3AED",
-              textDecoration: "none",
-              fontSize: "14px",
-            }}
-          >
-            ¿Olvidaste tu contraseña?
-          </Link>
-
-        </div>
-
+        <label>Contraseña</label>
         <Input
           type="password"
           placeholder="Ingresa tu contraseña"
+          value={password}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setPassword(e.target.value)
+          }
         />
-
       </div>
 
-      {/* BUTTON */}
+      {/* ERROR */}
+      {error && (
+        <p style={{ color: "red", marginBottom: "10px" }}>{error}</p>
+      )}
 
-      <Button>
-        Iniciar sesión
-      </Button>
+      {/* BUTTON */}
+      <Button onClick={handleLogin}>Iniciar sesión</Button>
 
       <div style={{ marginTop: "14px" }}>
-
         <GoogleButton
           text="Continuar con Google"
+          onClick={handleGoogle}
         />
-
       </div>
 
       {/* FOOTER */}
-
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: "24px",
-        }}
-      >
-
-        <p
-          style={{
-            color: "#94A3B8",
-            fontSize: "14px",
-          }}
-        >
-
-          ¿No tienes cuenta?{" "}
-
-          <Link
-            to="/register"
-            style={{
-              color: "#7C3AED",
-              textDecoration: "none",
-              fontWeight: "600",
-            }}
-          >
-            Regístrate
-          </Link>
-
-        </p>
-
-      </div>
-
+      <p>
+        ¿No tienes cuenta? <Link to="/register">Regístrate</Link>
+      </p>
     </AuthLayout>
-
   );
 }

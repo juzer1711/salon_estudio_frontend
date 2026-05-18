@@ -1,14 +1,17 @@
-type ButtonProps = {
-  children: React.ReactNode;
-};
+import React from "react";
+
+export type ButtonProps =
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    children: React.ReactNode;
+  };
 
 export default function Button({
   children,
+  ...props
 }: ButtonProps) {
-
   return (
-
     <button
+      {...props}
       style={{
         width: "100%",
         padding: "12px",
@@ -23,6 +26,5 @@ export default function Button({
     >
       {children}
     </button>
-
   );
 }
