@@ -1,3 +1,5 @@
+// src/pages/register/Register.tsx
+
 import {
   type ChangeEvent,
   type FormEvent,
@@ -8,12 +10,13 @@ import {
 import { Link } from "react-router-dom";
 
 import AuthLayout from "../../layouts/AuthLayout";
-
 import Button from "../../components/ui/Button";
 import GoogleButton from "../../components/ui/GoogleButton";
 import Input from "../../components/ui/Input";
 
 import { useAuthStore } from "../../store/useAuthStore";
+import { useSnackbar } from "../../context/SnackbarContext";
+import { isValidEmail, isValidPassword } from "../../utils/validators";
 
 export default function Register(): React.JSX.Element {
   const {
@@ -24,6 +27,8 @@ export default function Register(): React.JSX.Element {
     clearError,
   } = useAuthStore();
 
+  const { showSnackbar } = useSnackbar();
+
   /**
    * =========================================
    * LOCAL STATE
@@ -31,18 +36,31 @@ export default function Register(): React.JSX.Element {
    */
 
   const [email, setEmail] = useState<string>("");
-  const [password, setPassword] =
-    useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [emailError, setEmailError] = useState<string>("");
+  const [passwordError, setPasswordError] = useState<string>("");
 
   /**
    * =========================================
-   * CLEANUP
+   * CLEANUP al montar
    * =========================================
    */
 
   useEffect(() => {
     clearError();
   }, [clearError]);
+
+  /**
+   * =========================================
+   * FIX: Reaccionar al error del store con snackbar
+   * =========================================
+   */
+
+  useEffect(() => {
+    if (error) {
+      showSnackbar(error, "error");
+    }
+  }, [error, showSnackbar]);
 
   /**
    * =========================================
@@ -54,32 +72,41 @@ export default function Register(): React.JSX.Element {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-
     clearError();
+    setEmailError("");
+    setPasswordError("");
 
-    await registerWithEmail(
-      email.trim(),
-      password
-    );
+    let hasErrors = false;
 
-    /**
-     * El router interceptará automáticamente
-     * y enviará al usuario a /choose-username
-     * gracias al flag needsUsername.
-     */
+    if (!email.trim()) {
+      setEmailError("El correo electrónico es obligatorio.");
+      hasErrors = true;
+    } else if (!isValidEmail(email)) {
+      setEmailError("Ingresa un correo válido.");
+      hasErrors = true;
+    }
+
+    if (!password.trim()) {
+      setPasswordError("La contraseña es obligatoria.");
+      hasErrors = true;
+    } else if (!isValidPassword(password)) {
+      setPasswordError("La contraseña debe tener al menos 6 caracteres.");
+      hasErrors = true;
+    }
+
+    if (hasErrors) return;
+
+    await registerWithEmail(email.trim(), password).catch(() => {
+      // Error ya manejado por el useEffect de state.error
+    });
   };
 
-  const handleGoogleRegister =
-    async (): Promise<void> => {
-      clearError();
-
-      await loginWithGoogle();
-
-      /**
-       * El listener global manejará
-       * automáticamente la redirección.
-       */
-    };
+  const handleGoogleRegister = async (): Promise<void> => {
+    clearError();
+    await loginWithGoogle().catch(() => {
+      // Error ya manejado por el useEffect de state.error
+    });
+  };
 
   /**
    * =========================================
@@ -90,12 +117,9 @@ export default function Register(): React.JSX.Element {
   return (
     <AuthLayout>
       <main className="w-full">
-        <section
-          aria-labelledby="register-title"
-          className="w-full"
-        >
-          {/* HEADER */}
+        <section aria-labelledby="register-title" className="w-full">
 
+          {/* HEADER */}
           <header className="mb-8">
             <h1
               id="register-title"
@@ -103,22 +127,22 @@ export default function Register(): React.JSX.Element {
             >
               Crear cuenta
             </h1>
-
             <p className="mt-2 text-sm text-slate-300">
-              Regístrate para acceder al salón
-              colaborativo en tiempo real.
+              Regístrate para acceder al salón colaborativo en tiempo real.
             </p>
           </header>
 
           {/* FORM */}
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
 
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6"
-            noValidate
-          >
+            {/* Error global del store */}
+            {error && (
+              <p role="alert" aria-live="assertive" className="text-sm text-red-400">
+                {error}
+              </p>
+            )}
+
             {/* EMAIL */}
-
             <div className="space-y-2">
               <label
                 htmlFor="email"
@@ -126,7 +150,6 @@ export default function Register(): React.JSX.Element {
               >
                 Correo electrónico
               </label>
-
               <Input
                 id="email"
                 name="email"
@@ -134,17 +157,26 @@ export default function Register(): React.JSX.Element {
                 autoComplete="email"
                 placeholder="Ingresa tu correo"
                 value={email}
-                onChange={(
-                  event: ChangeEvent<HTMLInputElement>
-                ) =>
-                  setEmail(event.target.value)
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setEmail(e.target.value)
                 }
                 aria-required="true"
+                aria-describedby={emailError ? "email-error" : undefined}
+                aria-invalid={!!emailError}
               />
+              {emailError && (
+                <p
+                  id="email-error"
+                  role="alert"
+                  aria-live="assertive"
+                  className="text-sm text-red-300"
+                >
+                  {emailError}
+                </p>
+              )}
             </div>
 
             {/* PASSWORD */}
-
             <div className="space-y-2">
               <label
                 htmlFor="password"
@@ -152,7 +184,6 @@ export default function Register(): React.JSX.Element {
               >
                 Contraseña
               </label>
-
               <Input
                 id="password"
                 name="password"
@@ -160,73 +191,51 @@ export default function Register(): React.JSX.Element {
                 autoComplete="new-password"
                 placeholder="Crea una contraseña"
                 value={password}
-                onChange={(
-                  event: ChangeEvent<HTMLInputElement>
-                ) =>
-                  setPassword(event.target.value)
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setPassword(e.target.value)
                 }
                 aria-required="true"
+                aria-describedby={passwordError ? "password-error" : undefined}
+                aria-invalid={!!passwordError}
               />
+              {passwordError && (
+                <p
+                  id="password-error"
+                  role="alert"
+                  aria-live="assertive"
+                  className="text-sm text-red-300"
+                >
+                  {passwordError}
+                </p>
+              )}
             </div>
 
-            {/* ERROR */}
-
-            {error && (
-              <div
-                role="alert"
-                aria-live="assertive"
-                className="rounded-lg border border-red-500/40 bg-red-500/10 p-3"
-              >
-                <p className="text-sm text-red-300">
-                  {error}
-                </p>
-              </div>
-            )}
-
             {/* SUBMIT */}
-
             <Button
               type="submit"
-              disabled={
-                loading ||
-                !email.trim() ||
-                !password.trim()
-              }
+              disabled={loading}
               aria-busy={loading}
               className="w-full"
             >
-              {loading
-                ? "Creando cuenta..."
-                : "Crear cuenta"}
+              {loading ? "Creando cuenta..." : "Crear cuenta"}
             </Button>
           </form>
 
           {/* DIVIDER */}
-
           <div className="my-6 flex items-center">
             <div className="h-px flex-1 bg-slate-700" />
-
-            <span className="px-3 text-sm text-slate-400">
-              o continúa con
-            </span>
-
+            <span className="px-3 text-sm text-slate-400">o continúa con</span>
             <div className="h-px flex-1 bg-slate-700" />
           </div>
 
           {/* GOOGLE */}
-
           <GoogleButton
-            text={
-              loading
-                ? "Procesando..."
-                : "Continuar con Google"
-            }
+            text={loading ? "Procesando..." : "Continuar con Google"}
             onClick={handleGoogleRegister}
             disabled={loading}
           />
 
           {/* FOOTER */}
-
           <footer className="mt-8 text-center">
             <p className="text-sm text-slate-300">
               ¿Ya tienes cuenta?{" "}
@@ -238,6 +247,7 @@ export default function Register(): React.JSX.Element {
               </Link>
             </p>
           </footer>
+
         </section>
       </main>
     </AuthLayout>

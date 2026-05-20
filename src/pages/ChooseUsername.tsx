@@ -8,10 +8,7 @@ import {
   useState,
 } from "react";
 
-import { Navigate } from "react-router-dom";
-
 import { useAuthStore } from "../store/useAuthStore";
-
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 
@@ -32,12 +29,13 @@ type UsernameStatus =
  * =========================================
  * COMPONENT
  * =========================================
+ * Nota: los guards de navegación (user, needsUsername)
+ * ya están en UsernameRoute — no se necesitan aquí.
+ * =========================================
  */
 
 export default function ChooseUsername(): React.JSX.Element {
   const {
-    user,
-    needsUsername,
     loading,
     error,
     checkUsername,
@@ -66,61 +64,47 @@ export default function ChooseUsername(): React.JSX.Element {
 
   /**
    * =========================================
-   * REDIRECT SAFETY
-   * =========================================
-   */
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!needsUsername) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  /**
-   * =========================================
    * NORMALIZED USERNAME
    * =========================================
    */
 
-  const normalizedUsername = useMemo(() => {
-    return username.trim().toLowerCase();
-  }, [username]);
+  const normalizedUsername = useMemo(
+    () => username.trim().toLowerCase(),
+    [username]
+  );
 
   /**
    * =========================================
-   * USERNAME VALIDATION
+   * USERNAME VALIDATION con debounce
    * =========================================
    */
 
   useEffect(() => {
     clearError();
 
-    /**
-     * Reset states
-     */
     if (!normalizedUsername) {
       setUsernameStatus("idle");
       setUsernameMessage("");
       return;
     }
 
-    /**
-     * Basic frontend validation
-     */
     if (normalizedUsername.length < 3) {
       setUsernameStatus("error");
       setUsernameMessage(
         "El nombre de usuario debe tener al menos 3 caracteres."
       );
-
       return;
     }
 
-    /**
-     * Debounce async validation
-     */
+    // Validar formato antes de consultar el backend
+    if (!/^[a-zA-Z0-9_]+$/.test(normalizedUsername)) {
+      setUsernameStatus("error");
+      setUsernameMessage(
+        "Solo se permiten letras, números y guiones bajos."
+      );
+      return;
+    }
+
     const timeout = setTimeout(async () => {
       try {
         setIsCheckingUsername(true);
@@ -129,20 +113,14 @@ export default function ChooseUsername(): React.JSX.Element {
           "Verificando disponibilidad del nombre de usuario..."
         );
 
-        const available = await checkUsername(
-          normalizedUsername
-        );
+        const available = await checkUsername(normalizedUsername);
 
         if (available) {
           setUsernameStatus("available");
-          setUsernameMessage(
-            "Nombre de usuario disponible."
-          );
+          setUsernameMessage("Nombre de usuario disponible.");
         } else {
           setUsernameStatus("taken");
-          setUsernameMessage(
-            "Este nombre de usuario ya está ocupado."
-          );
+          setUsernameMessage("Este nombre de usuario ya está ocupado.");
         }
       } catch {
         setUsernameStatus("error");
@@ -155,15 +133,12 @@ export default function ChooseUsername(): React.JSX.Element {
     }, 600);
 
     return () => clearTimeout(timeout);
-  }, [
-    normalizedUsername,
-    checkUsername,
-    clearError,
-  ]);
+  }, [normalizedUsername, checkUsername, clearError]);
 
   /**
    * =========================================
    * FORM SUBMIT
+   * FIX: usa firstName + lastName (no displayName)
    * =========================================
    */
 
@@ -171,37 +146,25 @@ export default function ChooseUsername(): React.JSX.Element {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-
     clearError();
 
-    /**
-     * Defensive validation
-     */
     if (
       !firstName.trim() ||
       !lastName.trim() ||
-      !normalizedUsername
+      !normalizedUsername ||
+      usernameStatus !== "available"
     ) {
       return;
     }
 
-    if (usernameStatus !== "available") {
-      return;
-    }
-
-    const success = await createUserProfile({
+    await createUserProfile({
       username: normalizedUsername,
-      displayName: `${firstName.trim()} ${lastName.trim()}`,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
     });
 
-    /**
-     * El router moverá automáticamente
-     * al usuario al dashboard por cambio
-     * de estado global.
-     */
-    if (!success) {
-      return;
-    }
+    // El cambio de needsUsername: false en el store
+    // hace que UsernameRoute redirija al /dashboard automáticamente.
   };
 
   /**
@@ -237,22 +200,15 @@ export default function ChooseUsername(): React.JSX.Element {
           >
             Completa tu perfil
           </h1>
-
           <p className="mt-3 text-sm leading-6 text-slate-300">
             Antes de ingresar al salón colaborativo,
             necesitamos completar tu información básica.
           </p>
         </header>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-6"
-          noValidate
-        >
-          {/* =========================================
-              FIRST NAME
-          ========================================= */}
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
 
+          {/* NOMBRES */}
           <div className="space-y-2">
             <label
               htmlFor="firstName"
@@ -260,25 +216,21 @@ export default function ChooseUsername(): React.JSX.Element {
             >
               Nombres
             </label>
-
             <Input
               id="firstName"
               name="firstName"
               type="text"
               autoComplete="given-name"
               value={firstName}
-              onChange={(
-                event: ChangeEvent<HTMLInputElement>
-              ) => setFirstName(event.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setFirstName(e.target.value)
+              }
               placeholder="Ingresa tus nombres"
               aria-required="true"
             />
           </div>
 
-          {/* =========================================
-              LAST NAME
-          ========================================= */}
-
+          {/* APELLIDOS */}
           <div className="space-y-2">
             <label
               htmlFor="lastName"
@@ -286,25 +238,21 @@ export default function ChooseUsername(): React.JSX.Element {
             >
               Apellidos
             </label>
-
             <Input
               id="lastName"
               name="lastName"
               type="text"
               autoComplete="family-name"
               value={lastName}
-              onChange={(
-                event: ChangeEvent<HTMLInputElement>
-              ) => setLastName(event.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setLastName(e.target.value)
+              }
               placeholder="Ingresa tus apellidos"
               aria-required="true"
             />
           </div>
 
-          {/* =========================================
-              USERNAME
-          ========================================= */}
-
+          {/* USERNAME */}
           <div className="space-y-2">
             <label
               htmlFor="username"
@@ -312,34 +260,28 @@ export default function ChooseUsername(): React.JSX.Element {
             >
               Nombre de usuario
             </label>
-
             <Input
               id="username"
               name="username"
               type="text"
               autoComplete="username"
               value={username}
-              onChange={(
-                event: ChangeEvent<HTMLInputElement>
-              ) => setUsername(event.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setUsername(e.target.value)
+              }
               placeholder="Ej: juanserna"
               aria-required="true"
               aria-describedby="username-status"
               aria-invalid={
-                usernameStatus === "taken" ||
-                usernameStatus === "error"
+                usernameStatus === "taken" || usernameStatus === "error"
               }
             />
 
-            {/* =========================================
-                ACCESSIBLE LIVE REGION
-            ========================================= */}
-
+            {/* LIVE REGION accesible para lectores de pantalla */}
             <div
               id="username-status"
               role={
-                usernameStatus === "taken" ||
-                usernameStatus === "error"
+                usernameStatus === "taken" || usernameStatus === "error"
                   ? "alert"
                   : "status"
               }
@@ -363,39 +305,29 @@ export default function ChooseUsername(): React.JSX.Element {
             </div>
           </div>
 
-          {/* =========================================
-              GLOBAL ERROR
-          ========================================= */}
-
+          {/* ERROR GLOBAL del store */}
           {error && (
             <div
               role="alert"
               aria-live="assertive"
               className="rounded-lg border border-red-500/40 bg-red-500/10 p-3"
             >
-              <p className="text-sm text-red-300">
-                {error}
-              </p>
+              <p className="text-sm text-red-300">{error}</p>
             </div>
           )}
 
-          {/* =========================================
-              SUBMIT BUTTON
-          ========================================= */}
-
+          {/* SUBMIT */}
           <Button
             type="submit"
             disabled={isSubmitDisabled}
             aria-busy={loading}
             className="w-full"
           >
-            {loading
-              ? "Guardando perfil..."
-              : "Completar registro"}
+            {loading ? "Guardando perfil..." : "Completar registro"}
           </Button>
+
         </form>
       </section>
     </main>
   );
 }
-

@@ -10,8 +10,14 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 
 import { auth } from "../config/firebase";
+import {
+  getCurrentUserProfile,
+  createProfile,
+  checkUsernameAvailability,
+} from "../services/authService";
 
 /**
  * =========================
@@ -23,51 +29,30 @@ export interface UserProfile {
   uid: string;
   email: string;
   username: string;
-  displayName?: string;
-  photoURL?: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl?: string;
   createdAt?: string;
 }
 
 export interface CreateProfileDTO {
   username: string;
-  displayName?: string;
-  photoURL?: string;
-}
-
-interface CheckUsernameResponse {
-  available: boolean;
-}
-
-interface GetCurrentUserResponse {
-  exists: boolean;
-  user?: UserProfile;
-}
-
-interface CreateUserProfileResponse {
-  success?: boolean;
-  user?: UserProfile;
-  message?: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl?: string;
 }
 
 interface AuthState {
-  /**
-   * Usuario autenticado desde Firebase Auth
-   */
+  /** Usuario autenticado desde Firebase Auth */
   user: User | null;
 
-  /**
-   * Perfil persistido en Firestore vía Backend
-   */
+  /** Perfil persistido en Firestore vía Backend */
   profile: UserProfile | null;
 
-  /**
-   * Control de carga global
-   */
+  /** Control de carga global */
   loading: boolean;
 
-  /**
-   * Mensajes de error accesibles para UI
-   */
+  /** Mensajes de error accesibles para UI */
   error: string | null;
 
   /**
@@ -76,58 +61,53 @@ interface AuthState {
    */
   needsUsername: boolean;
 
-  /**
-   * Evita múltiples listeners de Firebase
-   */
+  /** Evita múltiples listeners de Firebase */
   authInitialized: boolean;
 
-  /**
-   * =========================
-   * ACTIONS
-   * =========================
-   */
+  // =========================
+  // ACTIONS
+  // =========================
 
   initAuthListener: () => void;
-
   loginWithEmail: (email: string, password: string) => Promise<void>;
-
-  registerWithEmail: (
-    email: string,
-    password: string
-  ) => Promise<void>;
-
+  registerWithEmail: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
-
   logout: () => Promise<void>;
-
   checkUsername: (username: string) => Promise<boolean>;
-
-  createUserProfile: (
-    profileData: CreateProfileDTO
-  ) => Promise<boolean>;
-
+  createUserProfile: (profileData: CreateProfileDTO) => Promise<boolean>;
   clearError: () => void;
 }
 
 /**
  * =========================
- * ENV
+ * FIREBASE ERROR TRANSLATOR
  * =========================
  */
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-console.log("BACKEND_URL:", BACKEND_URL);
+const translateAuthError = (error: unknown): string => {
+  if (error instanceof FirebaseError) {
+    switch (error.code) {
+      case "auth/invalid-credential":
+        return "Correo o contraseña incorrectos.";
+      case "auth/weak-password":
+        return "La contraseña debe tener al menos 6 caracteres.";
+      case "auth/email-already-in-use":
+        return "El correo ya está registrado.";
+      case "auth/popup-closed-by-user":
+        return "El proceso de autenticación fue cancelado.";
+      case "auth/network-request-failed":
+        return "No fue posible conectarse al servidor.";
+      default:
+        return "Ocurrió un error de autenticación.";
+    }
+  }
 
-/**
- * =========================
- * HELPERS
- * =========================
- */
+  if (error instanceof Error) {
+    return error.message;
+  }
 
-const getAuthHeaders = (uid: string): HeadersInit => ({
-  "Content-Type": "application/json",
-  uid,
-});
+  return "Ocurrió un error inesperado.";
+};
 
 /**
  * =========================
@@ -152,16 +132,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initAuthListener: () => {
     if (get().authInitialized) return;
 
-    set({
-      authInitialized: true,
-      loading: true,
-    });
+    set({ authInitialized: true, loading: true });
 
     onAuthStateChanged(auth, async (firebaseUser) => {
       try {
-        /**
-         * Usuario NO autenticado
-         */
         if (!firebaseUser) {
           set({
             user: null,
@@ -170,42 +144,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             loading: false,
             error: null,
           });
-
           return;
         }
 
-        /**
-         * Usuario autenticado en Firebase
-         */
-        set({
-          user: firebaseUser,
-          loading: true,
-          error: null,
-        });
+        set({ user: firebaseUser, loading: true, error: null });
 
-        /**
-         * Consultar perfil REAL en backend
-         */
-        const response = await fetch(
-          `${BACKEND_URL}/users/me`,
-          {
-            method: "GET",
-            headers: getAuthHeaders(firebaseUser.uid),
-          }
-        );
+        const data = await getCurrentUserProfile();
 
-        if (!response.ok) {
-          throw new Error(
-            "No fue posible validar el perfil del usuario."
-          );
-        }
-
-        const data: GetCurrentUserResponse =
-          await response.json();
-
-        /**
-         * Usuario YA tiene perfil en Firestore
-         */
         if (data.exists && data.user) {
           set({
             profile: data.user,
@@ -213,13 +158,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             loading: false,
             error: null,
           });
-
           return;
         }
 
-        /**
-         * Usuario autenticado PERO sin perfil
-         */
+        // Usuario autenticado PERO sin perfil → limbo
         set({
           profile: null,
           needsUsername: true,
@@ -227,14 +169,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           error: null,
         });
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Ocurrió un error inesperado.";
-
         set({
           loading: false,
-          error: message,
+          error: translateAuthError(error),
           profile: null,
           needsUsername: false,
         });
@@ -245,103 +182,61 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   /**
    * =========================================
    * LOGIN EMAIL
+   * FIX: lanza el error para que la vista lo capture
    * =========================================
    */
 
-  loginWithEmail: async (
-    email: string,
-    password: string
-  ) => {
+  loginWithEmail: async (email, password) => {
+    set({ loading: true, error: null });
+
     try {
-      set({
-        loading: true,
-        error: null,
-      });
-
-      await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      await signInWithEmailAndPassword(auth, email, password);
+      // El onAuthStateChanged toma el control desde aquí.
+      // loading se resetea dentro del listener.
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Error al iniciar sesión.";
-
-      set({
-        error: message,
-        loading: false,
-      });
-
-      throw error;
+      const message = translateAuthError(error);
+      set({ error: message, loading: false });
+      throw new Error(message); // ← FIX: permite que la vista reaccione
     }
   },
 
   /**
    * =========================================
    * REGISTER EMAIL
+   * FIX: lanza el error para que la vista lo capture
    * =========================================
    */
 
-  registerWithEmail: async (
-    email: string,
-    password: string
-  ) => {
+  registerWithEmail: async (email, password) => {
+    set({ loading: true, error: null });
+
     try {
-      set({
-        loading: true,
-        error: null,
-      });
-
-      await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      await createUserWithEmailAndPassword(auth, email, password);
+      // El onAuthStateChanged toma el control desde aquí.
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Error al registrar usuario.";
-
-      set({
-        error: message,
-        loading: false,
-      });
-
-      throw error;
+      const message = translateAuthError(error);
+      set({ error: message, loading: false });
+      throw new Error(message); // ← FIX
     }
   },
 
   /**
    * =========================================
    * GOOGLE LOGIN
+   * FIX: lanza el error para que la vista lo capture
    * =========================================
    */
 
   loginWithGoogle: async () => {
+    set({ loading: true, error: null });
+
     try {
-      set({
-        loading: true,
-        error: null,
-      });
-
       const provider = new GoogleAuthProvider();
-
       await signInWithPopup(auth, provider);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Error con autenticación de Google.";
-
-      set({
-        error: message,
-        loading: false,
-      });
-
-      throw error;
+      const message = translateAuthError(error);
+      set({ error: message, loading: false });
+      throw new Error(message); // ← FIX
     }
   },
 
@@ -352,14 +247,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    */
 
   logout: async () => {
+    set({ loading: true, error: null });
+
     try {
-      set({
-        loading: true,
-        error: null,
-      });
-
       await signOut(auth);
-
       set({
         user: null,
         profile: null,
@@ -367,17 +258,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         loading: false,
       });
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Error al cerrar sesión.";
-
-      set({
-        error: message,
-        loading: false,
-      });
-
-      throw error;
+      const message = translateAuthError(error);
+      set({ error: message, loading: false });
+      throw new Error(message);
     }
   },
 
@@ -387,43 +270,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * =========================================
    */
 
-  checkUsername: async (
-    username: string
-  ): Promise<boolean> => {
+  checkUsername: async (username) => {
     try {
-      set({
-        error: null,
-      });
-
-      const response = await fetch(
-        `${BACKEND_URL}/users/check-username/${encodeURIComponent(
-          username
-        )}`,
-        {
-          method: "GET",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "No fue posible verificar el username."
-        );
-      }
-
-      const data: CheckUsernameResponse =
-        await response.json();
-
-      return data.available;
+      set({ error: null });
+      return await checkUsernameAvailability(username);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Error validando username.";
-
-      set({
-        error: message,
-      });
-
+      set({ error: translateAuthError(error) });
       return false;
     }
   },
@@ -431,73 +283,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   /**
    * =========================================
    * CREATE USER PROFILE
+   * FIX: usa firstName/lastName (no displayName)
    * =========================================
    */
 
-  createUserProfile: async (
-    profileData: CreateProfileDTO
-  ): Promise<boolean> => {
+  createUserProfile: async (profileData) => {
+    set({ loading: true, error: null });
+
     try {
-      const currentUser = get().user;
+      await createProfile(profileData);
 
-      if (!currentUser) {
-        throw new Error(
-          "No existe un usuario autenticado."
-        );
-      }
-
-      set({
-        loading: true,
-        error: null,
-      });
-
-      const response = await fetch(
-        `${BACKEND_URL}/users/profile`,
-        {
-          method: "POST",
-          headers: getAuthHeaders(currentUser.uid),
-          body: JSON.stringify({
-            uid: currentUser.uid,
-            email: currentUser.email,
-            ...profileData,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "No fue posible crear el perfil."
-        );
-      }
-
-      const data: CreateUserProfileResponse =
-        await response.json();
-
-      /**
-       * Reconsultar el perfil oficial desde backend
-       * para garantizar sincronización total
-       */
-      const meResponse = await fetch(
-        `${BACKEND_URL}/users/me`,
-        {
-          method: "GET",
-          headers: getAuthHeaders(currentUser.uid),
-        }
-      );
-
-      if (!meResponse.ok) {
-        throw new Error(
-          "Perfil creado pero no fue posible sincronizarlo."
-        );
-      }
-
-      const meData: GetCurrentUserResponse =
-        await meResponse.json();
+      const meData = await getCurrentUserProfile();
 
       if (!meData.exists || !meData.user) {
-        throw new Error(
-          "El perfil no pudo validarse correctamente."
-        );
+        throw new Error("El perfil no pudo validarse correctamente.");
       }
 
       set({
@@ -509,16 +308,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       return true;
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Error creando perfil.";
-
       set({
-        error: message,
+        error: translateAuthError(error),
         loading: false,
       });
-
       return false;
     }
   },
@@ -529,9 +322,5 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * =========================================
    */
 
-  clearError: () => {
-    set({
-      error: null,
-    });
-  },
+  clearError: () => set({ error: null }),
 }));

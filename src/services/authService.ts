@@ -1,0 +1,124 @@
+// src/services/authService.ts
+
+import { auth } from "../config/firebase";
+import { BACKEND_URL } from "../config/env";
+
+import type {
+  CreateProfileDTO,
+  UserProfile,
+} from "../store/useAuthStore";
+
+/**
+ * =========================
+ * HELPERS
+ * =========================
+ */
+
+const getAuthHeaders = async (): Promise<HeadersInit> => {
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    throw new Error("No existe usuario autenticado.");
+  }
+
+  const token = await currentUser.getIdToken();
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+};
+
+/**
+ * Lee el mensaje de error del backend si existe,
+ * o usa un fallback genérico.
+ */
+const extractBackendError = async (
+  response: Response,
+  fallback: string
+): Promise<string> => {
+  try {
+    const data = await response.json();
+    return data?.message ?? fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+/**
+ * =========================
+ * GET CURRENT USER PROFILE
+ * GET /api/v1/users/me
+ * =========================
+ */
+
+export const getCurrentUserProfile = async (): Promise<{
+  exists: boolean;
+  user?: UserProfile;
+}> => {
+  const response = await fetch(`${BACKEND_URL}/users/me`, {
+    method: "GET",
+    headers: await getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const message = await extractBackendError(
+      response,
+      "No fue posible obtener el perfil."
+    );
+    throw new Error(message);
+  }
+
+  return response.json();
+};
+
+/**
+ * =========================
+ * CHECK USERNAME AVAILABILITY
+ * GET /api/v1/users/check-username/:username
+ * =========================
+ */
+
+export const checkUsernameAvailability = async (
+  username: string
+): Promise<boolean> => {
+  const response = await fetch(
+    `${BACKEND_URL}/users/check-username/${encodeURIComponent(username)}`
+  );
+
+  if (!response.ok) {
+    const message = await extractBackendError(
+      response,
+      "No fue posible verificar el nombre de usuario."
+    );
+    throw new Error(message);
+  }
+
+  const data = await response.json();
+  return data.available;
+};
+
+/**
+ * =========================
+ * CREATE PROFILE
+ * POST /api/v1/users/profile
+ * =========================
+ */
+
+export const createProfile = async (
+  profileData: CreateProfileDTO
+): Promise<void> => {
+  const response = await fetch(`${BACKEND_URL}/users/profile`, {
+    method: "POST",
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(profileData),
+  });
+
+  if (!response.ok) {
+    const message = await extractBackendError(
+      response,
+      "No fue posible crear el perfil."
+    );
+    throw new Error(message);
+  }
+};
