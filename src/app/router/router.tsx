@@ -13,14 +13,14 @@ import {
 import Login from "../../pages/login/Login";
 import Register from "../../pages/register/Register";
 
-import Dashboard from "../../pages/Dashboard";
+import Dashboard from "../../pages/Dashboard/Dashboard";
 import Rooms from "../../pages/Rooms";
 import Profile from "../../pages/Profile";
 import Room from "../../pages/Room";
 import CreateRoom from "../../pages/CreateRoom";
 import MyRooms from "../../pages/MyRooms";
 
-import ChooseUsername from "../../pages/ChooseUsername";
+import ChooseUsername from "../../pages/ChooseUsername/ChooseUsername";
 
 
 /**

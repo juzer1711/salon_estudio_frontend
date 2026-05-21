@@ -1,4 +1,4 @@
-import Navbar from '../components/Links'; 
+import Navbar from '../components/Navbar'; 
 
 export default function Room() {
   return (

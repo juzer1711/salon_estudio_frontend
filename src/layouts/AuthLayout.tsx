@@ -1,39 +1,30 @@
-type AuthLayoutProps = {
-  children: React.ReactNode;
-};
+import "./AuthLayout.css";
 
-export default function AuthLayout({
-  children,
-}: AuthLayoutProps) {
+type AuthLayoutProps = { children: React.ReactNode };
 
+export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
+    <div className="auth-layout">
+      {/* Glows decorativos */}
+      <div aria-hidden="true" className="auth-layout__glow auth-layout__glow--top" />
+      <div aria-hidden="true" className="auth-layout__glow auth-layout__glow--bottom" />
 
-    <main
-      style={{
-        height: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "12px",
-        background: "#070B1A",
-      }}
-    >
-
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "460px",
-          background: "#111827",
-          borderRadius: "24px",
-          padding: "28px",
-        }}
-      >
-
-        {children}
-
+      {/* Logo FUERA del card */}
+      <div className="auth-layout__logo-wrapper">
+        <img
+          src="/src/assets/LOGOROOMIX.png"
+          alt="Roomix"
+          className="auth-layout__logo-img"
+        />
+        <span className="auth-layout__logo-name">
+          Room<span>ix</span>
+        </span>
       </div>
 
-    </main>
-
+      {/* Card — solo el formulario */}
+      <div className="auth-layout__card">
+        {children}
+      </div>
+    </div>
   );
 }

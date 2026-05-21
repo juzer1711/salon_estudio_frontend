@@ -1,0 +1,258 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  width: 100%;
+
+  backdrop-filter: blur(18px);
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(2, 6, 23, 0.88),
+      rgba(2, 6, 23, 0.72)
+    );
+
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.navbar__container {
+  width: 100%;
+  max-width: 1350px;
+
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+/* =========================================
+   BRAND
+========================================= */
+
+.navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+
+  flex-shrink: 0;
+}
+
+.navbar__logo {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+}
+
+.navbar__brand-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+
+  color: #f8fafc;
+}
+
+.navbar__brand-name span {
+  color: #a78bfa;
+}
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+.navbar__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar__link {
+  position: relative;
+
+  padding: 0.7rem 1rem;
+
+  border-radius: 12px;
+
+  font-size: 0.95rem;
+  font-weight: 500;
+
+  color: #94a3b8;
+  text-decoration: none;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.navbar__link:hover {
+  background: rgba(124, 58, 237, 0.12);
+  color: #f8fafc;
+}
+
+.navbar__link:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+.navbar__link--active {
+  background: rgba(124, 58, 237, 0.18);
+  color: #ffffff;
+}
+
+/* =========================================
+   ACTIONS
+========================================= */
+
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* =========================================
+   PROFILE
+========================================= */
+
+.navbar__profile {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.navbar__avatar {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 999px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(124, 58, 237, 1),
+      rgba(168, 85, 247, 1)
+    );
+
+  color: white;
+
+  font-size: 0.9rem;
+  font-weight: 700;
+
+  box-shadow:
+    0 8px 24px rgba(124, 58, 237, 0.35);
+}
+
+.navbar__profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navbar__name {
+  margin: 0;
+
+  color: #f8fafc;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.navbar__username {
+  margin: 0;
+
+  color: #94a3b8;
+
+  font-size: 0.8rem;
+}
+
+/* =========================================
+   LOGOUT
+========================================= */
+
+.navbar__logout {
+  border: 1px solid rgba(239, 68, 68, 0.22);
+
+  background: rgba(239, 68, 68, 0.08);
+
+  color: #fca5a5;
+
+  padding: 0.72rem 1rem;
+
+  border-radius: 14px;
+
+  font-size: 0.88rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.navbar__logout:hover {
+  background: rgba(239, 68, 68, 0.16);
+
+  border-color: rgba(239, 68, 68, 0.35);
+
+  transform: translateY(-1px);
+}
+
+.navbar__logout:focus-visible {
+  outline: 2px solid #f87171;
+  outline-offset: 2px;
+}
+
+.navbar__logout:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+  .navbar__container {
+    flex-wrap: wrap;
+  }
+
+  .navbar__nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .navbar__profile-info {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar__container {
+    padding: 1rem;
+  }
+
+  .navbar__nav {
+    gap: 0.25rem;
+  }
+
+  .navbar__link {
+    padding: 0.65rem 0.8rem;
+    font-size: 0.88rem;
+  }
+
+  .navbar__logout {
+    padding: 0.65rem 0.85rem;
+  }
+}

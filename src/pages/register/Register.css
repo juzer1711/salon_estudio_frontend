@@ -1,0 +1,104 @@
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.register-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.register-field__label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.register-field__error {
+  font-size: 13px;
+  color: #fca5a5;
+}
+
+.register-error-banner {
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.1);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #fca5a5;
+}
+
+.register-header__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.4rem, 4vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: #f8fafc;
+  margin-bottom: 6px;
+}
+
+.register-header__subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.register-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.register-divider__line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.register-divider__text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.register-footer {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.register-footer__link {
+  color: #a78bfa;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.register-footer__link:hover {
+  color: #c4b5fd;
+}
+
+/* Status del username — los tres estados */
+.register-username-status {
+  min-height: 20px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.register-username-status--available { color: #34d399; }
+.register-username-status--taken     { color: #fca5a5; }
+.register-username-status--error     { color: #fca5a5; }
+.register-username-status--checking  { color: var(--text-secondary); }
+
+.register-error-banner {
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.1);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #fca5a5;
+}

@@ -1,0 +1,80 @@
+.auth-layout {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 2rem 1rem;
+  gap: 1.5rem;
+  background: var(--background);
+}
+
+/* Glows */
+.auth-layout__glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.auth-layout__glow--top {
+  top: -80px;
+  left: -80px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 65%);
+}
+
+.auth-layout__glow--bottom {
+  bottom: -60px;
+  right: -60px;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(109,40,217,0.15) 0%, transparent 65%);
+}
+
+/* Logo fuera del card */
+.auth-layout__logo-wrapper {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.auth-layout__logo-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  /* WCAG: el alt="Roomix" ya está en el img, no necesita más */
+}
+
+.auth-layout__logo-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: #f8fafc;
+}
+
+.auth-layout__logo-name span {
+  color: #a78bfa;
+}
+
+/* Card */
+.auth-layout__card {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 26rem;
+  background: rgba(15, 19, 40, 0.97);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 28px;
+  padding: clamp(1.75rem, 5vw, 2.5rem);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+}

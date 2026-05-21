@@ -1,79 +1,104 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 /* =========================
-   CONFIGURACIÓN DE TAILWIND v4
+   DARK THEME
 ========================= */
-@theme {
-  --color-background: var(--background);
-  --color-sidebar: var(--sidebar);
-  --color-panel: var(--panel);
-  --color-card: var(--card);
-
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-
-  --color-text: var(--text);
-  --color-text-secondary: var(--text-secondary);
-
-  --color-border: var(--border);
-}
-
-/* =========================
-   TEMAS (Tus variables nativas)
-========================= */
-:root {
-  /* Por defecto light o las variables base */
-}
-
-/* TEMA OSCURO */
 .dark {
-  --background: #070B1A;
-  --sidebar: #111827;
-  --panel: #1A1B3A;
-  --card: #23254B;
+  --background:       #070b1a;
+  --sidebar:          #0d1120;
+  --panel:            rgba(255,255,255,0.04);
+  --card:             #0f1328;
 
-  --primary: #7C3AED;
-  --primary-hover: #8B5CF6;
+  --primary:          #7c3aed;
+  --primary-hover:    #8b5cf6;
 
-  --text: #F8FAFC;
-  --text-secondary: #94A3B8;
+  --text:             #f8fafc;
+  --text-secondary:   #94a3b8;
 
-  --border: #2E335A;
-}
+  --border:           rgba(255,255,255,0.09);
+  --border-accent:    rgba(124,58,237,0.35);
 
-/* TEMA CLARO */
-.light {
-  --background: #F3F4F6;
-  --sidebar: #FFFFFF;
-  --panel: #E5E7EB;
-  --card: #FFFFFF;
-
-  --primary: #7C3AED;
-  --primary-hover: #8B5CF6;
-
-  --text: #111827;
-  --text-secondary: #6B7280;
-
-  --border: #D1D5DB;
+  --input-focus-ring: rgba(124,58,237,0.25);
+  --card-shadow:      0 30px 80px rgba(0,0,0,0.6);
 }
 
 /* =========================
-   RESET Y ESTILOS BASE
+   LIGHT THEME
 ========================= */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+.light {
+  --background:       #f3f4f6;
+  --sidebar:          #ffffff;
+  --panel:            #e5e7eb;
+  --card:             #ffffff;
+
+  --primary:          #7c3aed;
+  --primary-hover:    #6d28d9;
+
+  --text:             #111827;
+  --text-secondary:   #6b7280;
+
+  --border:           #d1d5db;
+  --border-accent:    rgba(124,58,237,0.4);
+
+  --input-focus-ring: rgba(124,58,237,0.2);
+  --card-shadow:      0 20px 60px rgba(0,0,0,0.15);
 }
+
+/* =========================
+   RESET
+========================= */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+
+/* =========================
+   BASE
+========================= */
+html { scroll-behavior: smooth; }
 
 body {
+  min-height: 100vh;
   background: var(--background);
   color: var(--text);
-  font-family: Inter, sans-serif;
+  font-family: 'Nunito', system-ui, sans-serif;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   transition: background 0.3s ease, color 0.3s ease;
-  min-height: 100vh;
 }
 
-#root {
-  min-height: 100vh;
+#root { min-height: 100vh; }
+
+/* =========================
+   ACCESIBILIDAD WCAG 2.2
+========================= */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  background: var(--primary);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 8px 8px;
+  font-weight: 700;
+  z-index: 9999;
+  transition: top 0.2s;
+}
+.skip-link:focus { top: 0; }
+
+/* =========================
+   SELECTION / SCROLLBAR
+========================= */
+::selection { background: var(--primary); color: #fff; }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }

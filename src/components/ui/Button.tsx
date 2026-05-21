@@ -1,4 +1,5 @@
 import React from "react";
+import "./Button.css";
 
 export type ButtonProps =
   React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -7,22 +8,17 @@ export type ButtonProps =
 
 export default function Button({
   children,
+  disabled,
+  className = "",
+  style,
   ...props
 }: ButtonProps) {
   return (
     <button
       {...props}
-      style={{
-        width: "100%",
-        padding: "12px",
-        fontSize: "14px",
-        borderRadius: "12px",
-        border: "none",
-        background: "#7C3AED",
-        color: "white",
-        fontWeight: 600,
-        cursor: "pointer",
-      }}
+      disabled={disabled}
+      style={style}
+      className={`roomix-btn-primary ${className}`}
     >
       {children}
     </button>

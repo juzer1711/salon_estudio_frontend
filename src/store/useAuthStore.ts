@@ -70,7 +70,11 @@ interface AuthState {
 
   initAuthListener: () => void;
   loginWithEmail: (email: string, password: string) => Promise<void>;
-  registerWithEmail: (email: string, password: string) => Promise<void>;
+  registerWithEmail: (
+    email: string,
+    password: string,
+    profileData: CreateProfileDTO
+  ) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   checkUsername: (username: string) => Promise<boolean>;
@@ -149,7 +153,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         set({ user: firebaseUser, loading: true, error: null });
 
-        const data = await getCurrentUserProfile();
+
+        let data = await getCurrentUserProfile();
+
+        if (!data.exists) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, 500)
+          );
+
+          data = await getCurrentUserProfile();
+        }
 
         if (data.exists && data.user) {
           set({
@@ -158,10 +171,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             loading: false,
             error: null,
           });
+
           return;
         }
 
-        // Usuario autenticado PERO sin perfil → limbo
+        // Usuario autenticado PERO sin perfil → Google flow
         set({
           profile: null,
           needsUsername: true,
@@ -191,7 +205,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // El onAuthStateChanged toma el control desde aquí.
       // loading se resetea dentro del listener.
     } catch (error) {
       const message = translateAuthError(error);
@@ -207,12 +220,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    * =========================================
    */
 
-  registerWithEmail: async (email, password) => {
+  registerWithEmail: async (email, password, profileData) => {
     set({ loading: true, error: null });
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      // El onAuthStateChanged toma el control desde aquí.
+          // Crear perfil inmediatamente
+      await createProfile(profileData);
+
+      // Obtener perfil recién creado
+      const meData = await getCurrentUserProfile();
+
+      if (!meData.exists || !meData.user) {
+          throw new Error(
+            "El perfil no pudo validarse correctamente."
+          );
+        }
+
+        set({
+          profile: meData.user,
+          needsUsername: false,
+          loading: false,
+          error: null,
+        });
     } catch (error) {
       const message = translateAuthError(error);
       set({ error: message, loading: false });

@@ -1,0 +1,60 @@
+.choose-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.choose-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.choose-field__label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.choose-field__error {
+  font-size: 13px;
+  color: #fca5a5;
+}
+
+/* Status del username — los tres estados */
+.choose-username-status {
+  min-height: 20px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.choose-username-status--available { color: #34d399; }
+.choose-username-status--taken     { color: #fca5a5; }
+.choose-username-status--error     { color: #fca5a5; }
+.choose-username-status--checking  { color: var(--text-secondary); }
+
+.choose-error-banner {
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.1);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #fca5a5;
+}
+
+.choose-header__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.4rem, 4vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: #f8fafc;
+  margin-bottom: 6px;
+}
+
+.choose-header__subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}

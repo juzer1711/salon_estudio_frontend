@@ -1,64 +1,60 @@
 import React, { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import "./Input.css";
 
-export type InputProps =
-  React.InputHTMLAttributes<HTMLInputElement>;
+export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 export default function Input({
   type = "text",
+  className = "",
+  disabled,
+  style,
   ...props
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
-
   const isPassword = type === "password";
 
   return (
-    <div style={{ position: "relative" }}>
+    <div className="relative w-full">
       <input
         {...props}
-        type={
-          isPassword
-            ? showPassword
-              ? "text"
-              : "password"
-            : type
-        }
-        style={{
-          width: "100%",
-          padding: "12px 14px",
-          paddingRight: isPassword ? "45px" : "14px",
-          borderRadius: "12px",
-          border: "1px solid #2E335A",
-          background: "#1A1B3A",
-          color: "white",
-          fontSize: "14px",
-          outline: "none",
-        }}
+        disabled={disabled}
+        type={isPassword ? (showPassword ? "text" : "password") : type}
+        style={{ paddingRight: isPassword ? "3rem" : undefined, ...style }}
+        className={`roomix-input ${className}`}
       />
 
       {isPassword && (
         <button
           type="button"
-          onClick={() => setShowPassword(!showPassword)}
+          aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          onClick={() => setShowPassword((v) => !v)}
           style={{
             position: "absolute",
-            top: "50%",
             right: "14px",
+            top: "50%",
             transform: "translateY(-50%)",
-            background: "transparent",
+            background: "none",
             border: "none",
-            color: "#94A3B8",
             cursor: "pointer",
+            color: "var(--text-secondary)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            padding: "2px",
+            borderRadius: "6px",
+            transition: "color 0.2s",
           }}
+          onMouseEnter={(e) =>
+            ((e.currentTarget as HTMLButtonElement).style.color =
+              "var(--text)")
+          }
+          onMouseLeave={(e) =>
+            ((e.currentTarget as HTMLButtonElement).style.color =
+              "var(--text-secondary)")
+          }
         >
-          {showPassword ? (
-            <FiEyeOff size={18} />
-          ) : (
-            <FiEye size={18} />
-          )}
+          {showPassword ? <FiEyeOff size={17} /> : <FiEye size={17} />}
         </button>
       )}
     </div>

@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 
 export default {
+  darkMode: "class",
 
   content: [
     "./index.html",
@@ -9,10 +10,9 @@ export default {
 
   theme: {
     extend: {
-
       colors: {
-
         background: "var(--background)",
+
         sidebar: "var(--sidebar)",
         panel: "var(--panel)",
         card: "var(--card)",
@@ -21,14 +21,13 @@ export default {
         "primary-hover": "var(--primary-hover)",
 
         text: "var(--text)",
-        "text-secondary": "var(--text-secondary)",
+        "text-secondary":
+          "var(--text-secondary)",
 
         border: "var(--border)",
-
       },
-
     },
   },
 
   plugins: [],
-}
+};

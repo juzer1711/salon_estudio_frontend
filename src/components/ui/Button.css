@@ -1,0 +1,39 @@
+.roomix-btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 1.25rem;
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(124,58,237,0.38);
+  transition: all 0.2s ease;
+}
+
+.roomix-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  box-shadow: 0 8px 30px rgba(124,58,237,0.5);
+  transform: translateY(-1px);
+}
+
+.roomix-btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.roomix-btn-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.roomix-btn-primary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}

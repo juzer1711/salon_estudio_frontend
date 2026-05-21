@@ -8,9 +8,11 @@ import {
   useState,
 } from "react";
 
-import { useAuthStore } from "../store/useAuthStore";
-import Input from "../components/ui/Input";
-import Button from "../components/ui/Button";
+import { useAuthStore } from "../../store/useAuthStore";
+import Input from "../../components/ui/Input";
+import Button from "../../components/ui/Button";
+import "./ChooseUsername.css";
+import AuthLayout from "../../layouts/AuthLayout";
 
 /**
  * =========================================
@@ -52,6 +54,14 @@ export default function ChooseUsername(): React.JSX.Element {
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [username, setUsername] = useState<string>("");
+  const [firstNameError, setFirstNameError] =
+    useState<string>("");
+
+  const [lastNameError, setLastNameError] =
+    useState<string>("");
+
+  const [usernameError, setUsernameError] =
+    useState<string>("");
 
   const [usernameStatus, setUsernameStatus] =
     useState<UsernameStatus>("idle");
@@ -81,6 +91,9 @@ export default function ChooseUsername(): React.JSX.Element {
 
   useEffect(() => {
     clearError();
+    setFirstNameError("");
+    setLastNameError("");
+    setUsernameError("");
 
     if (!normalizedUsername) {
       setUsernameStatus("idle");
@@ -135,6 +148,8 @@ export default function ChooseUsername(): React.JSX.Element {
     return () => clearTimeout(timeout);
   }, [normalizedUsername, checkUsername, clearError]);
 
+  
+
   /**
    * =========================================
    * FORM SUBMIT
@@ -148,14 +163,33 @@ export default function ChooseUsername(): React.JSX.Element {
     event.preventDefault();
     clearError();
 
-    if (
-      !firstName.trim() ||
-      !lastName.trim() ||
-      !normalizedUsername ||
-      usernameStatus !== "available"
-    ) {
-      return;
+    let hasErrors = false;
+
+    if (!firstName.trim()) {
+      setFirstNameError("Los nombres son obligatorios.");
+      hasErrors = true;
     }
+
+    if (!lastName.trim()) {
+      setLastNameError("Los apellidos son obligatorios.");
+      hasErrors = true;
+    }
+
+    if (!normalizedUsername) {
+      setUsernameError(
+        "El nombre de usuario es obligatorio."
+      );
+      hasErrors = true;
+    }
+
+    if (usernameStatus !== "available") {
+      setUsernameError(
+        "Debes elegir un nombre de usuario válido."
+      );
+      hasErrors = true;
+    }
+
+    if (hasErrors) return;
 
     await createUserProfile({
       username: normalizedUsername,
@@ -187,33 +221,34 @@ export default function ChooseUsername(): React.JSX.Element {
    * =========================================
    */
 
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-10">
-      <section
-        aria-labelledby="choose-username-title"
-        className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-2xl"
-      >
-        <header className="mb-8">
-          <h1
-            id="choose-username-title"
-            className="text-3xl font-bold text-white"
-          >
+return (
+  <AuthLayout>
+    <main className="w-full">
+      <section aria-labelledby="choose-username-title" className="w-full">
+
+        {/* HEADER */}
+        <header style={{ marginBottom: "1.75rem" }}>
+          <h1 id="choose-username-title" className="choose-header__title">
             Completa tu perfil
           </h1>
-          <p className="mt-3 text-sm leading-6 text-slate-300">
+          <p className="choose-header__subtitle">
             Antes de ingresar al salón colaborativo,
             necesitamos completar tu información básica.
           </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+        <form onSubmit={handleSubmit} className="choose-form" noValidate>
+
+          {/* ERROR GLOBAL */}
+          {error && (
+            <div role="alert" aria-live="assertive" className="choose-error-banner">
+              {error}
+            </div>
+          )}
 
           {/* NOMBRES */}
-          <div className="space-y-2">
-            <label
-              htmlFor="firstName"
-              className="block text-sm font-medium text-slate-100"
-            >
+          <div className="choose-field">
+            <label htmlFor="firstName" className="choose-field__label">
               Nombres
             </label>
             <Input
@@ -221,21 +256,29 @@ export default function ChooseUsername(): React.JSX.Element {
               name="firstName"
               type="text"
               autoComplete="given-name"
-              value={firstName}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setFirstName(e.target.value)
-              }
               placeholder="Ingresa tus nombres"
+              value={firstName}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {setFirstName(e.target.value)
+                  if (firstNameError) {
+                    setFirstNameError("");
+                  }
+              }} 
               aria-required="true"
             />
+            {firstNameError && (
+              <p
+                role="alert"
+                aria-live="assertive"
+                className="choose-field__error"
+              >
+                {firstNameError}
+              </p>
+            )}
           </div>
 
           {/* APELLIDOS */}
-          <div className="space-y-2">
-            <label
-              htmlFor="lastName"
-              className="block text-sm font-medium text-slate-100"
-            >
+          <div className="choose-field">
+            <label htmlFor="lastName" className="choose-field__label">
               Apellidos
             </label>
             <Input
@@ -243,21 +286,29 @@ export default function ChooseUsername(): React.JSX.Element {
               name="lastName"
               type="text"
               autoComplete="family-name"
-              value={lastName}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setLastName(e.target.value)
-              }
               placeholder="Ingresa tus apellidos"
+              value={lastName}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>{ setLastName(e.target.value)
+                if (lastNameError) {
+                    setLastNameError("");
+                  }
+              }}
               aria-required="true"
             />
+            {lastNameError && (
+              <p
+                role="alert"
+                aria-live="assertive"
+                className="choose-field__error"
+              >
+                {lastNameError}
+              </p>
+            )}
           </div>
 
           {/* USERNAME */}
-          <div className="space-y-2">
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-slate-100"
-            >
+          <div className="choose-field">
+            <label htmlFor="username" className="choose-field__label">
               Nombre de usuario
             </label>
             <Input
@@ -265,11 +316,13 @@ export default function ChooseUsername(): React.JSX.Element {
               name="username"
               type="text"
               autoComplete="username"
-              value={username}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setUsername(e.target.value)
-              }
               placeholder="Ej: juanserna"
+              value={username}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>{ setUsername(e.target.value)
+                if (usernameError) {
+                    setUsernameError("");
+                  }
+              }}
               aria-required="true"
               aria-describedby="username-status"
               aria-invalid={
@@ -277,7 +330,7 @@ export default function ChooseUsername(): React.JSX.Element {
               }
             />
 
-            {/* LIVE REGION accesible para lectores de pantalla */}
+            {/* LIVE REGION — accesible para lectores de pantalla */}
             <div
               id="username-status"
               role={
@@ -286,42 +339,26 @@ export default function ChooseUsername(): React.JSX.Element {
                   : "status"
               }
               aria-live="polite"
-              className="min-h-[24px]"
+              className={`choose-username-status choose-username-status--${usernameStatus}`}
             >
-              {usernameMessage && (
+              {usernameMessage}
+            </div>
+            {usernameError && (
                 <p
-                  className={`text-sm ${
-                    usernameStatus === "available"
-                      ? "text-emerald-400"
-                      : usernameStatus === "taken" ||
-                          usernameStatus === "error"
-                        ? "text-red-400"
-                        : "text-slate-300"
-                  }`}
+                  role="alert"
+                  aria-live="assertive"
+                  className="choose-field__error"
                 >
-                  {usernameMessage}
+                  {usernameError}
                 </p>
               )}
-            </div>
           </div>
-
-          {/* ERROR GLOBAL del store */}
-          {error && (
-            <div
-              role="alert"
-              aria-live="assertive"
-              className="rounded-lg border border-red-500/40 bg-red-500/10 p-3"
-            >
-              <p className="text-sm text-red-300">{error}</p>
-            </div>
-          )}
 
           {/* SUBMIT */}
           <Button
             type="submit"
             disabled={isSubmitDisabled}
             aria-busy={loading}
-            className="w-full"
           >
             {loading ? "Guardando perfil..." : "Completar registro"}
           </Button>
@@ -329,5 +366,6 @@ export default function ChooseUsername(): React.JSX.Element {
         </form>
       </section>
     </main>
-  );
+  </AuthLayout>
+);
 }

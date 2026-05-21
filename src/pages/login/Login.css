@@ -1,0 +1,85 @@
+/* Estructura del formulario — sin space-y anidados */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-field__label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.login-field__error {
+  font-size: 13px;
+  color: #fca5a5;
+}
+
+.login-error-banner {
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.1);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #fca5a5;
+}
+
+.login-header__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.4rem, 4vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: #f8fafc;
+  margin-bottom: 6px;
+}
+
+.login-header__subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0.25rem 0;
+}
+
+.login-divider__line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.login-divider__text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.login-footer {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.login-footer__link {
+  color: #a78bfa;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.login-footer__link:hover {
+  color: #c4b5fd;
+}

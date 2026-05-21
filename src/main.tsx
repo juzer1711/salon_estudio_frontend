@@ -76,7 +76,7 @@ const AppBootstrap = (): React.JSX.Element => {
  * para que esté disponible en el loader también.
  * =========================================
  */
-
+document.documentElement.classList.add("dark");
 ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 ).render(
