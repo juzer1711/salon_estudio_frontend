@@ -1,4 +1,5 @@
 import "./AuthLayout.css";
+import logoRoomix from "../assets/LOGOROOMIX.png";
 
 type AuthLayoutProps = { children: React.ReactNode };
 
@@ -12,7 +13,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       {/* Logo FUERA del card */}
       <div className="auth-layout__logo-wrapper">
         <img
-          src="/src/assets/LOGOROOMIX.png"
+          src={logoRoomix}
           alt="Roomix"
           className="auth-layout__logo-img"
         />
