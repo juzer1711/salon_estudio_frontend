@@ -125,30 +125,35 @@
   gap: 0.8rem;
 }
 
+/* El contenedor del avatar */
+/* Asegura que el contenedor del avatar sea un círculo perfecto y controle el desborde */
 .navbar__avatar {
-  width: 42px;
-  height: 42px;
-
-  border-radius: 999px;
-
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #0056ff; /* Tu color principal de Roomix */
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden; /* Crucial para que la imagen no se salga del círculo */
+  flex-shrink: 0;   /* Evita que se aplaste si hay textos largos al lado */
+}
 
-  background:
-    linear-gradient(
-      135deg,
-      rgba(124, 58, 237, 1),
-      rgba(168, 85, 247, 1)
-    );
+/* Fuerza a la imagen de Google a llenar el contenedor sin deformarse */
+.navbar__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Mantiene la proporción correcta recortando los bordes excedentes */
+  display: block;
+}
 
-  color: white;
-
-  font-size: 0.9rem;
-  font-weight: 700;
-
-  box-shadow:
-    0 8px 24px rgba(124, 58, 237, 0.35);
+/* Estilo para las iniciales de respaldo */
+.navbar__avatar-text {
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .navbar__profile-info {

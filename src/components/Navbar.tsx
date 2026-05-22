@@ -1,5 +1,6 @@
 // src/components/Navbar.tsx
 
+import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 
@@ -9,6 +10,11 @@ import "./Navbar.css";
 
 export default function Navbar(): React.JSX.Element {
   const { profile, logout, loading } = useAuthStore();
+  const [avatarError, setAvatarError] = useState<boolean>(false);
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [profile?.avatarUrl]);
 
   const initials =
     profile?.firstName && profile?.lastName
@@ -77,7 +83,17 @@ export default function Navbar(): React.JSX.Element {
             aria-label="Perfil del usuario"
           >
             <div className="navbar__avatar">
-              {initials}
+              {profile?.avatarUrl && !avatarError ? (
+                <img 
+                  src={profile.avatarUrl} 
+                  alt={`Avatar de ${profile.firstName}`} 
+                  className="navbar__avatar-img"
+                  referrerPolicy="no-referrer" 
+                  onError={() => setAvatarError(true)} 
+                />
+              ) : (
+                <span className="navbar__avatar-text">{initials}</span>
+              )}
             </div>
 
             <div className="navbar__profile-info">

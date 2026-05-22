@@ -234,6 +234,7 @@ export default function Register(): React.JSX.Element {
       username: normalizedUsername,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
+      avatarUrl: "",
     }
   );
   };
@@ -363,13 +364,13 @@ return (
               }}
               aria-required="true"
             />
-            {usernameError && (
+            {lastNameError && (
               <p
                 role="alert"
                 aria-live="assertive"
                 className="register-field__error"
               >
-                {usernameError}
+                {lastNameError}
               </p>
             )}
           </div>

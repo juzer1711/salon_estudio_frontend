@@ -38,6 +38,7 @@ type UsernameStatus =
 
 export default function ChooseUsername(): React.JSX.Element {
   const {
+    user,
     loading,
     error,
     checkUsername,
@@ -88,6 +89,16 @@ export default function ChooseUsername(): React.JSX.Element {
    * USERNAME VALIDATION con debounce
    * =========================================
    */
+
+  useEffect(() => {
+    if (user) {
+      if (user.displayName) {
+        const parts = user.displayName.split(" ");
+        setFirstName(parts[0] || "");
+        setLastName(parts.slice(1).join(" ") || "");
+      }
+    }
+  }, [user]);
 
   useEffect(() => {
     clearError();
@@ -191,10 +202,13 @@ export default function ChooseUsername(): React.JSX.Element {
 
     if (hasErrors) return;
 
+    const googleAvatar = user?.photoURL || "";
+
     await createUserProfile({
       username: normalizedUsername,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
+      avatarUrl: googleAvatar,
     });
 
     // El cambio de needsUsername: false en el store
