@@ -303,19 +303,19 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #0056ff; /* Tu color principal de Roomix */
+  background-color: #0056ff; 
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden; /* Crucial para que la imagen no se salga del círculo */
-  flex-shrink: 0;   /* Evita que se aplaste si hay textos largos al lado */
+  overflow: hidden; 
+  flex-shrink: 0;   
 }
 
 /* Fuerza a la imagen de Google a llenar el contenedor sin deformarse */
 .navbar__avatar-img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Mantiene la proporción correcta recortando los bordes excedentes */
+  object-fit: cover; 
   display: block;
 }
 
