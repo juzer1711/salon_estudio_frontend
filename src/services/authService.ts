@@ -22,7 +22,6 @@ const getAuthHeaders = async (): Promise<HeadersInit> => {
   }
 
   const token = await currentUser.getIdToken();
-  console.log(token);
 
   return {
     "Content-Type": "application/json",

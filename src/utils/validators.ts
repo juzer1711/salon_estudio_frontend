@@ -19,3 +19,9 @@ export const isValidUsername = (
     value
   );
 };
+
+export const isEducationalEmail = (
+  email: string
+): boolean => {
+  return email.trim().toLowerCase().endsWith(".edu.co");
+};
