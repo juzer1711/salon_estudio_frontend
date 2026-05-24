@@ -18,7 +18,7 @@ import Input from "../../components/ui/Input";
 
 import { useAuthStore } from "../../store/useAuthStore";
 import { useSnackbar } from "../../context/SnackbarContext";
-import { isValidEmail, isValidPassword } from "../../utils/validators";
+import { isValidEmail, isValidPassword, isEducationalEmail} from "../../utils/validators";
 
 
 export default function Login(): React.JSX.Element {
@@ -87,6 +87,9 @@ export default function Login(): React.JSX.Element {
       setEmailError("El correo electrónico es obligatorio.");
       hasErrors = true;
     } else if (!isValidEmail(email)) {
+      setEmailError("Ingresa un correo válido.");
+      hasErrors = true;
+    }else if (!isEducationalEmail(email)) {
       setEmailError("Ingresa un correo válido.");
       hasErrors = true;
     }
