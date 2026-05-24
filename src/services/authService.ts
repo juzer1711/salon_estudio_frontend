@@ -5,6 +5,7 @@ import { BACKEND_URL } from "../config/env";
 
 import type {
   CreateProfileDTO,
+  UpdateProfileDTO,
   UserProfile,
 } from "../store/useAuthStore";
 
@@ -119,6 +120,63 @@ export const createProfile = async (
       response,
       "No fue posible crear el perfil."
     );
+    throw new Error(message);
+  }
+};
+
+/**
+ * =========================
+ * UPDATE PROFILE
+ * PUT /api/v1/users/me
+ * =========================
+ */
+
+export const updateProfile = async (
+  profileData: UpdateProfileDTO
+): Promise<void> => {
+
+  const response = await fetch(
+    `${BACKEND_URL}/users/me`,
+    {
+      method: "PUT",
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(profileData),
+    }
+  );
+
+  if (!response.ok) {
+    const message = await extractBackendError(
+      response,
+      "No fue posible actualizar el perfil."
+    );
+
+    throw new Error(message);
+  }
+};
+
+/**
+ * =========================
+ * DELETE ACCOUNT
+ * DELETE /api/v1/users/me
+ * =========================
+ */
+
+export const deleteAccount = async (): Promise<void> => {
+
+  const response = await fetch(
+    `${BACKEND_URL}/users/me`,
+    {
+      method: "DELETE",
+      headers: await getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    const message = await extractBackendError(
+      response,
+      "No fue posible eliminar la cuenta."
+    );
+
     throw new Error(message);
   }
 };

@@ -17,6 +17,8 @@ import {
   getCurrentUserProfile,
   createProfile,
   checkUsernameAvailability,
+  updateProfile,
+  deleteAccount,
 } from "../services/authService";
 
 /**
@@ -39,6 +41,14 @@ export interface CreateProfileDTO {
   username: string;
   firstName: string;
   lastName: string;
+  avatarUrl?: string;
+}
+
+export interface UpdateProfileDTO {
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
   avatarUrl?: string;
 }
 
@@ -79,6 +89,8 @@ interface AuthState {
   logout: () => Promise<void>;
   checkUsername: (username: string) => Promise<boolean>;
   createUserProfile: (profileData: CreateProfileDTO) => Promise<boolean>;
+  updateUserProfile: (profileData: UpdateProfileDTO) => Promise<boolean>;
+  removeAccount: () => Promise<boolean>;
   clearError: () => void;
 }
 
@@ -360,6 +372,87 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         error: translateAuthError(error),
         loading: false,
       });
+      return false;
+    }
+  },
+
+    /**
+   * =========================================
+   * UPDATE USER PROFILE
+   * =========================================
+   */
+
+  updateUserProfile: async (profileData) => {
+    set({ loading: true, error: null });
+
+    try {
+
+      await updateProfile(profileData);
+
+      const meData =
+        await getCurrentUserProfile();
+
+      if (!meData.exists || !meData.user) {
+        throw new Error(
+          "No fue posible obtener el perfil actualizado."
+        );
+      }
+
+      set({
+        profile: meData.user,
+        loading: false,
+        error: null,
+      });
+
+      return true;
+
+    } catch (error) {
+
+      set({
+        error: translateAuthError(error),
+        loading: false,
+      });
+
+      return false;
+    }
+  },
+
+    /**
+   * =========================================
+   * REMOVE ACCOUNT
+   * =========================================
+   */
+
+  removeAccount: async () => {
+
+    set({
+      loading: true,
+      error: null,
+    });
+
+    try {
+
+      await deleteAccount();
+
+      await signOut(auth);
+
+      set({
+        user: null,
+        profile: null,
+        needsUsername: false,
+        loading: false,
+        error: null,
+      });
+
+      return true;
+
+    } catch (error) {
+
+      set({
+        error: translateAuthError(error),
+        loading: false,
+      });
+
       return false;
     }
   },
