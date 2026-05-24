@@ -52,14 +52,7 @@ export default function ChooseUsername(): React.JSX.Element {
    * =========================================
    */
 
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
   const [username, setUsername] = useState<string>("");
-  const [firstNameError, setFirstNameError] =
-    useState<string>("");
-
-  const [lastNameError, setLastNameError] =
-    useState<string>("");
 
   const [usernameError, setUsernameError] =
     useState<string>("");
@@ -90,20 +83,9 @@ export default function ChooseUsername(): React.JSX.Element {
    * =========================================
    */
 
-  useEffect(() => {
-    if (user) {
-      if (user.displayName) {
-        const parts = user.displayName.split(" ");
-        setFirstName(parts[0] || "");
-        setLastName(parts.slice(1).join(" ") || "");
-      }
-    }
-  }, [user]);
 
   useEffect(() => {
     clearError();
-    setFirstNameError("");
-    setLastNameError("");
     setUsernameError("");
 
     if (!normalizedUsername) {
@@ -176,16 +158,6 @@ export default function ChooseUsername(): React.JSX.Element {
 
     let hasErrors = false;
 
-    if (!firstName.trim()) {
-      setFirstNameError("Los nombres son obligatorios.");
-      hasErrors = true;
-    }
-
-    if (!lastName.trim()) {
-      setLastNameError("Los apellidos son obligatorios.");
-      hasErrors = true;
-    }
-
     if (!normalizedUsername) {
       setUsernameError(
         "El nombre de usuario es obligatorio."
@@ -201,6 +173,16 @@ export default function ChooseUsername(): React.JSX.Element {
     }
 
     if (hasErrors) return;
+
+    // Procesamos el displayName que mandó Google de forma interna y segura
+    let firstName = "";
+    let lastName = "";
+
+    if (user?.displayName) {
+      const parts = user.displayName.split(" ");
+      firstName = parts[0] || "";
+      lastName = parts.slice(1).join(" ") || "";
+    }
 
     const googleAvatar = user?.photoURL || "";
 
@@ -225,8 +207,6 @@ export default function ChooseUsername(): React.JSX.Element {
     loading ||
     isCheckingUsername ||
     usernameStatus !== "available" ||
-    !firstName.trim() ||
-    !lastName.trim() ||
     !normalizedUsername;
 
   /**
@@ -259,66 +239,6 @@ return (
               {error}
             </div>
           )}
-
-          {/* NOMBRES */}
-          <div className="choose-field">
-            <label htmlFor="firstName" className="choose-field__label">
-              Nombres
-            </label>
-            <Input
-              id="firstName"
-              name="firstName"
-              type="text"
-              autoComplete="given-name"
-              placeholder="Ingresa tus nombres"
-              value={firstName}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {setFirstName(e.target.value)
-                  if (firstNameError) {
-                    setFirstNameError("");
-                  }
-              }} 
-              aria-required="true"
-            />
-            {firstNameError && (
-              <p
-                role="alert"
-                aria-live="assertive"
-                className="choose-field__error"
-              >
-                {firstNameError}
-              </p>
-            )}
-          </div>
-
-          {/* APELLIDOS */}
-          <div className="choose-field">
-            <label htmlFor="lastName" className="choose-field__label">
-              Apellidos
-            </label>
-            <Input
-              id="lastName"
-              name="lastName"
-              type="text"
-              autoComplete="family-name"
-              placeholder="Ingresa tus apellidos"
-              value={lastName}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>{ setLastName(e.target.value)
-                if (lastNameError) {
-                    setLastNameError("");
-                  }
-              }}
-              aria-required="true"
-            />
-            {lastNameError && (
-              <p
-                role="alert"
-                aria-live="assertive"
-                className="choose-field__error"
-              >
-                {lastNameError}
-              </p>
-            )}
-          </div>
 
           {/* USERNAME */}
           <div className="choose-field">

@@ -275,7 +275,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result =
+        await signInWithPopup(auth, provider);
+
+        const email = result.user.email;
+
+        if (
+          !email ||
+          !email.toLowerCase().endsWith(".edu.co")
+        ) {
+          await signOut(auth);
+
+          set({
+            loading: false,
+          });
+
+          throw new Error(
+            "Debes usar un correo institucional .edu.co"
+          );
+        }
     } catch (error) {
       const message = translateAuthError(error);
       set({ error: message, loading: false });
