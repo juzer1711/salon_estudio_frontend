@@ -26,10 +26,10 @@ export default function Navbar(): React.JSX.Element {
   };
 
   return (
-    <header className="navbar">
-      <div className="navbar__container">
+    <aside className="sidebar">
+      {/* LOGO */}
+      <div className="sidebar__top">
 
-        {/* LEFT */}
         <div className="navbar__brand">
           <img
             src={logo}
@@ -42,81 +42,85 @@ export default function Navbar(): React.JSX.Element {
           </span>
         </div>
 
-        {/* CENTER */}
-        <nav
-          className="navbar__nav"
-          aria-label="Navegación principal"
-        >
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              `navbar__link ${isActive ? "navbar__link--active" : ""}`
-            }
-          >
-            Dashboard
-          </NavLink>
-
-          <NavLink
-            to="/rooms"
-            className={({ isActive }) =>
-              `navbar__link ${isActive ? "navbar__link--active" : ""}`
-            }
-          >
-            Salas
-          </NavLink>
-
-          <NavLink
-            to="/profile"
-            className={({ isActive }) =>
-              `navbar__link ${isActive ? "navbar__link--active" : ""}`
-            }
-          >
-            Perfil
-          </NavLink>
-        </nav>
-
-        {/* RIGHT */}
-        <div className="navbar__actions">
-
-          <div
-            className="navbar__profile"
-            aria-label="Perfil del usuario"
-          >
-            <div className="navbar__avatar">
-              {profile?.avatarUrl && !avatarError ? (
-                <img 
-                  src={profile.avatarUrl} 
-                  alt={`Avatar de ${profile.firstName}`} 
-                  className="navbar__avatar-img"
-                  referrerPolicy="no-referrer" 
-                  onError={() => setAvatarError(true)} 
-                />
-              ) : (
-                <span className="navbar__avatar-text">{initials}</span>
-              )}
-            </div>
-
-            <div className="navbar__profile-info">
-              <p className="navbar__name">
-                {profile?.firstName ?? "Usuario"}
-              </p>
-
-              <p className="navbar__username">
-                @{profile?.username ?? "roomix"}
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={handleLogout}
-            disabled={loading}
-            aria-busy={loading}
-            className="navbar__logout"
-          >
-            {loading ? "Cerrando..." : "Salir"}
-          </button>
-        </div>
       </div>
-    </header>
+
+      {/* PROFILE */}
+      <div className="sidebar__profile">
+
+        <div className="sidebar__avatar">
+          {profile?.avatarUrl && !avatarError ? (
+            <img
+              src={profile.avatarUrl}
+              alt={`Avatar de ${profile.firstName}`}
+              className="sidebar__avatar-img"
+              referrerPolicy="no-referrer"
+              onError={() => setAvatarError(true)}
+            />
+          ) : (
+            <span className="sidebar__avatar-text">
+              {initials}
+            </span>
+          )}
+        </div>
+
+        <h3 className="sidebar__name">
+          {profile?.firstName ?? "Usuario"}
+        </h3>
+
+        <p className="sidebar__username">
+          @{profile?.username ?? "roomix"}
+        </p>
+
+        <button
+          onClick={handleLogout}
+          disabled={loading}
+          className="sidebar__logout"
+        >
+          {loading ? "Cerrando..." : "Cerrar sesión"}
+        </button>
+
+      </div>
+
+      {/* NAVIGATION */}
+      <nav
+        className="sidebar__nav"
+        aria-label="Navegación principal"
+      >
+
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) =>
+            `sidebar__link ${
+              isActive ? "sidebar__link--active" : ""
+            }`
+          }
+        >
+          Dashboard
+        </NavLink>
+
+        <NavLink
+          to="/rooms"
+          className={({ isActive }) =>
+            `sidebar__link ${
+              isActive ? "sidebar__link--active" : ""
+            }`
+          }
+        >
+          Salas
+        </NavLink>
+
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            `sidebar__link ${
+              isActive ? "sidebar__link--active" : ""
+            }`
+          }
+        >
+          Perfil
+        </NavLink>
+
+      </nav>
+    </aside>
   );
 }
