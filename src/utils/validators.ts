@@ -6,6 +6,14 @@ export const isValidEmail = (
   );
 };
 
+export const isEducationalEmail = (
+  value: string
+): boolean => {
+  return value
+    .toLowerCase()
+    .endsWith(".edu.co");
+};
+
 export const isValidPassword = (
   value: string
 ): boolean => {
@@ -17,5 +25,13 @@ export const isValidUsername = (
 ): boolean => {
   return /^[a-zA-Z0-9_]+$/.test(
     value
+  );
+};
+
+export const isValidName = (
+  value: string
+): boolean => {
+  return /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(
+    value.trim()
   );
 };

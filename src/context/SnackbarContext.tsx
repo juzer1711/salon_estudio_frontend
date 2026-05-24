@@ -7,6 +7,11 @@ import {
   type ReactNode,
 } from "react";
 
+import {
+  FiCheckCircle,
+  FiXCircle,
+} from "react-icons/fi";
+
 type SnackbarType = "success" | "error";
 
 interface SnackbarState {
@@ -93,13 +98,42 @@ export const SnackbarProvider = ({
           "
         >
           <div
-            className={`rounded-xl px-4 py-3 text-sm font-medium text-white ${
-              snackbar.type === "success"
-                ? "bg-emerald-600"
-                : "bg-red-600"
-            }`}
+            className={`
+              flex items-center gap-3
+              rounded-2xl
+              border
+              px-5 py-4
+              text-sm font-semibold text-white
+              shadow-2xl
+              backdrop-blur-xl
+              transition-all duration-300
+              ${
+                snackbar.type === "success"
+                  ? "border-emerald-400/20 bg-emerald-500/15"
+                  : "border-red-400/20 bg-red-500/15"
+              }
+            `}
           >
-            {snackbar.message}
+
+            <div
+              className={`
+                flex h-10 w-10 items-center justify-center
+                rounded-full
+                ${
+                  snackbar.type === "success"
+                    ? "bg-emerald-500/20 text-emerald-300"
+                    : "bg-red-500/20 text-red-300"
+                }
+              `}
+            >
+              {snackbar.type === "success" ? (
+                <FiCheckCircle size={20} />
+              ) : (
+                <FiXCircle size={20} />
+              )}
+            </div>
+
+            <span>{snackbar.message}</span>
           </div>
         </div>
       )}
