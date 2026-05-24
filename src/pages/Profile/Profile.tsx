@@ -3,6 +3,11 @@ import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
+import {
+  isEducationalEmail,
+  isValidName,
+} from "../../utils/validators";
+import { useSnackbar, } from "../../context/SnackbarContext";
 
 import {
   useAuthStore,
@@ -19,10 +24,14 @@ export default function Profile(): React.JSX.Element {
     error,
     updateUserProfile,
     removeAccount,
+    clearError,
   } = useAuthStore();
 
-  const [successMessage, setSuccessMessage] =
-    useState<string>("");
+  useEffect(() => {
+    clearError();
+  }, []);
+
+  const { showSnackbar } = useSnackbar();
 
   const [formData, setFormData] =
     useState<UpdateProfileDTO>({
@@ -65,15 +74,51 @@ export default function Profile(): React.JSX.Element {
 
     event.preventDefault();
 
-    setSuccessMessage("");
+    if (
+      !isEducationalEmail(formData.email)
+    ) {
+      showSnackbar(
+        "Debes usar un correo institucional .edu.co",
+        "error"
+      );
+
+      return;
+    }
+
+    if (!isValidName(formData.firstName)) {
+
+      showSnackbar(
+        "El nombre solo puede contener letras.",
+        "error"
+      );
+
+      return;
+    }
+
+    if (!isValidName(formData.lastName)) {
+
+      showSnackbar(
+        "El apellido solo puede contener letras.",
+        "error"
+      );
+
+      return;
+    }
 
     const success =
       await updateUserProfile(formData);
 
     if (success) {
-      setSuccessMessage(
-        "Perfil actualizado correctamente."
+
+      showSnackbar(
+        "Perfil actualizado correctamente.",
+        "success"
       );
+
+    } else if (error) {
+
+      showSnackbar(error, "error");
+
     }
   };
 
@@ -221,18 +266,6 @@ export default function Profile(): React.JSX.Element {
                     placeholder="https://..."
                   />
                 </div>
-
-                {error && (
-                  <p className="profile-form__error">
-                    {error}
-                  </p>
-                )}
-
-                {successMessage && (
-                  <p className="profile-form__success">
-                    {successMessage}
-                  </p>
-                )}
 
                 <div className="profile-form__actions">
                   <Button

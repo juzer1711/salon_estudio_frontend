@@ -6,7 +6,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import "./SnackBar.css"
+
+import {
+  FiCheckCircle,
+  FiXCircle,
+} from "react-icons/fi";
+
 type SnackbarType = "success" | "error";
 
 interface SnackbarState {
@@ -72,34 +77,66 @@ export const SnackbarProvider = ({
       {children}
 
       {snackbar.open && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="
+            fixed
+            bottom-6
+            left-1/2
+            z-50
+            w-[90%]
+            max-w-md
+            -translate-x-1/2
+            rounded-xl
+            px-4
+            py-3
+            shadow-2xl
+            backdrop-blur-sm
+            transition-all
+            duration-300
+          "
+        >
           <div
-            role="alert"
-            aria-live="assertive"
-            className="snackbar-container"
+            className={`
+              flex items-center gap-3
+              rounded-2xl
+              border
+              px-5 py-4
+              text-sm font-semibold text-white
+              shadow-2xl
+              backdrop-blur-xl
+              transition-all duration-300
+              ${
+                snackbar.type === "success"
+                  ? "border-emerald-400/20 bg-emerald-500/15"
+                  : "border-red-400/20 bg-red-500/15"
+              }
+            `}
           >
+
             <div
-              className={`snackbar snackbar--${snackbar.type}`}
+              className={`
+                flex h-10 w-10 items-center justify-center
+                rounded-full
+                ${
+                  snackbar.type === "success"
+                    ? "bg-emerald-500/20 text-emerald-300"
+                    : "bg-red-500/20 text-red-300"
+                }
+              `}
             >
-              {/* ICON */}
-              <div className="snackbar__icon">
-                {snackbar.type === "success" ? "✓" : "!"}
-              </div>
-
-              {/* CONTENT */}
-              <div className="snackbar__content">
-                <p className="snackbar__title">
-                  {snackbar.type === "success"
-                    ? "Operación exitosa"
-                    : "Ocurrió un problema"}
-                </p>
-
-                <p className="snackbar__message">
-                  {snackbar.message}
-                </p>
-              </div>
+              {snackbar.type === "success" ? (
+                <FiCheckCircle size={20} />
+              ) : (
+                <FiXCircle size={20} />
+              )}
             </div>
+
+            <span>{snackbar.message}</span>
           </div>
-        )}
+        </div>
+      )}
     </SnackbarContext.Provider>
   );
 };

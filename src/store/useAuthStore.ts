@@ -9,6 +9,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  reload,
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 
@@ -383,11 +384,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    */
 
   updateUserProfile: async (profileData) => {
-    set({ loading: true, error: null });
+
+    set({ error: null });
 
     try {
 
       await updateProfile(profileData);
+
+      await reload(auth.currentUser!);
 
       const meData =
         await getCurrentUserProfile();
@@ -400,7 +404,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({
         profile: meData.user,
-        loading: false,
         error: null,
       });
 
@@ -410,7 +413,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({
         error: translateAuthError(error),
-        loading: false,
       });
 
       return false;
