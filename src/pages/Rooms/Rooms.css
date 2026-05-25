@@ -1,0 +1,174 @@
+.rooms {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 7rem 1.5rem 3rem;
+  background: var(--background);
+}
+
+.rooms__container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.rooms__header {
+  margin-bottom: 2rem;
+}
+
+.rooms__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.rooms__title span {
+  color: #a78bfa;
+}
+
+.rooms__subtitle {
+  margin-top: 10px;
+  max-width: 700px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.rooms-create {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 24px;
+  border: 1px solid rgba(124,58,237,0.15);
+  background: rgba(15, 19, 40, 0.92);
+  backdrop-filter: blur(18px);
+}
+
+.rooms-create__form {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+  max-width: 600px; 
+}
+
+.rooms-create__field {
+  flex: 2;
+}
+
+.rooms-create__label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.rooms-create__input {
+  width: 100%;
+  height: 50px; /* Reducido a 50px para estilizarlo mejor */
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(15,23,42,.8);
+  padding: 0 16px;
+  color: #f8fafc;
+  font-family: inherit; /* Hereda la fuente general */
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.rooms-create__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  padding: 0 28px; /* Un poco más de aire a los lados */
+  border-radius: 12px;
+  border: none;
+  background: #7c3aed;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  box-sizing: border-box;
+  white-space: nowrap;
+  flex: 1; /* Permite que crezca proporcionalmente */
+  max-width: 160px; /* Limita el ancho del botón para que no se vea gigante */
+}
+
+.rooms-create__button:hover {
+  background: #6d28d9;
+}
+
+.rooms-create__error {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #fca5a5;
+}
+
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.rooms-empty {
+  padding: 3rem 2rem;
+  text-align: center;
+  border-radius: 24px;
+  border: 1px dashed rgba(124,58,237,0.2);
+  background: rgba(15,19,40,0.7);
+}
+
+.rooms-empty__icon {
+  font-size: 3rem;
+}
+
+.rooms-empty__title {
+  margin-top: 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.rooms-empty__text {
+  margin-top: 10px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* GLOWS */
+
+.rooms__glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.rooms__glow--top {
+  top: -100px;
+  left: -100px;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
+}
+
+.rooms__glow--bottom {
+  bottom: -80px;
+  right: -80px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(109,40,217,0.14) 0%, transparent 70%);
+}
+
+@media (max-width: 768px) {
+  .rooms-create__form {
+    flex-direction: column;
+    align-items: stretch; /* En móvil, ambos ocupan el 100% del ancho */
+  }
+}

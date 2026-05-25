@@ -10,15 +10,15 @@ import {
   UsernameRoute,
 } from "./ProtectedRoute";
 
-import Login from "../../pages/login/Login";
-import Register from "../../pages/register/Register";
+import Login from "../../pages/login/Login.tsx";
+import Register from "../../pages/register/Register.tsx";
 
-import Dashboard from "../../pages/Dashboard/Dashboard";
-import Rooms from "../../pages/Rooms";
-import Profile from "../../pages/Profile/Profile";
-import Room from "../../pages/Room";
-import CreateRoom from "../../pages/CreateRoom";
-import MyRooms from "../../pages/MyRooms";
+import Dashboard from "../../pages/Dashboard/Dashboard.tsx";
+import Rooms from "../../pages/Rooms/Rooms.tsx";
+import Profile from "../../pages/Profile/Profile.tsx";
+import Room from "../../pages/Room/Room.tsx";
+import CreateRoom from "../../pages/CreateRoom.tsx";
+import MyRooms from "../../pages/MyRooms/MyRooms.tsx";
 
 import ChooseUsername from "../../pages/ChooseUsername/ChooseUsername";
 
@@ -117,7 +117,7 @@ export const router = createBrowserRouter([
         element: <Rooms />,
       },
       {
-        path: "/room/:id",
+        path: "/room/:roomId",
         element: <Room />,
       },
       {

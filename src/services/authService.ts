@@ -1,7 +1,7 @@
 // src/services/authService.ts
 
 import { auth } from "../config/firebase";
-import { BACKEND_URL } from "../config/env";
+import { API_URL } from "../config/env";
 
 import type {
   CreateProfileDTO,
@@ -23,6 +23,7 @@ const getAuthHeaders = async (): Promise<HeadersInit> => {
   }
 
   const token = await currentUser.getIdToken();
+  console.log(token);
 
   return {
     "Content-Type": "application/json",
@@ -49,7 +50,7 @@ const extractBackendError = async (
 /**
  * =========================
  * GET CURRENT USER PROFILE
- * GET /api/v1/users/me
+ * GET /api/users/me
  * =========================
  */
 
@@ -57,7 +58,7 @@ export const getCurrentUserProfile = async (): Promise<{
   exists: boolean;
   user?: UserProfile;
 }> => {
-  const response = await fetch(`${BACKEND_URL}/users/me`, {
+  const response = await fetch(`${API_URL}/users/me`, {
     method: "GET",
     headers: await getAuthHeaders(),
   });
@@ -76,7 +77,7 @@ export const getCurrentUserProfile = async (): Promise<{
 /**
  * =========================
  * CHECK USERNAME AVAILABILITY
- * GET /api/v1/users/check-username/:username
+ * GET /api/users/check-username/:username
  * =========================
  */
 
@@ -84,7 +85,7 @@ export const checkUsernameAvailability = async (
   username: string
 ): Promise<boolean> => {
   const response = await fetch(
-    `${BACKEND_URL}/users/check-username/${encodeURIComponent(username)}`
+    `${API_URL}/users/check-username/${encodeURIComponent(username)}`
   );
 
   if (!response.ok) {
@@ -102,14 +103,14 @@ export const checkUsernameAvailability = async (
 /**
  * =========================
  * CREATE PROFILE
- * POST /api/v1/users/profile
+ * POST /api/users/profile
  * =========================
  */
 
 export const createProfile = async (
   profileData: CreateProfileDTO
 ): Promise<void> => {
-  const response = await fetch(`${BACKEND_URL}/users/profile`, {
+  const response = await fetch(`${API_URL}/users/profile`, {
     method: "POST",
     headers: await getAuthHeaders(),
     body: JSON.stringify(profileData),
@@ -127,7 +128,7 @@ export const createProfile = async (
 /**
  * =========================
  * UPDATE PROFILE
- * PUT /api/v1/users/me
+ * PUT /api/users/me
  * =========================
  */
 
@@ -136,7 +137,7 @@ export const updateProfile = async (
 ): Promise<void> => {
 
   const response = await fetch(
-    `${BACKEND_URL}/users/me`,
+    `${API_URL}/users/me`,
     {
       method: "PUT",
       headers: await getAuthHeaders(),
@@ -157,14 +158,14 @@ export const updateProfile = async (
 /**
  * =========================
  * DELETE ACCOUNT
- * DELETE /api/v1/users/me
+ * DELETE /api/users/me
  * =========================
  */
 
 export const deleteAccount = async (): Promise<void> => {
 
   const response = await fetch(
-    `${BACKEND_URL}/users/me`,
+    `${API_URL}/users/me`,
     {
       method: "DELETE",
       headers: await getAuthHeaders(),
