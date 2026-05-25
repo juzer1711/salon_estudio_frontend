@@ -4,8 +4,8 @@ import {
   type ReactNode,
 } from "react";
 
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/SideBar";
+import Navbar from "../components/Navbar.tsx";
+import Sidebar from "../components/SideBar.tsx";
 
 import "./AppLayout.css";
 
