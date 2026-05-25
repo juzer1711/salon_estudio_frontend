@@ -222,7 +222,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       const message = translateAuthError(error);
       set({ error: message, loading: false });
-      throw new Error(message); // ← FIX: permite que la vista reaccione
+      throw new Error(message,{ cause: error }); // ← FIX: permite que la vista reaccione
     }
   },
 
@@ -259,7 +259,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       const message = translateAuthError(error);
       set({ error: message, loading: false });
-      throw new Error(message); // ← FIX
+      throw new Error(message,{ cause: error }); // ← FIX
     }
   },
 
@@ -297,7 +297,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       const message = translateAuthError(error);
       set({ error: message, loading: false });
-      throw new Error(message); // ← FIX
+      throw new Error(message,{ cause: error }); // ← FIX
     }
   },
 
@@ -321,7 +321,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       const message = translateAuthError(error);
       set({ error: message, loading: false });
-      throw new Error(message);
+      throw new Error(message,{ cause: error });
     }
   },
 

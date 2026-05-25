@@ -6,7 +6,6 @@ import {
 
 import Navbar from "../components/Navbar.tsx";
 import Sidebar from "../components/SideBar.tsx";
-
 import "./AppLayout.css";
 
 interface Props {
