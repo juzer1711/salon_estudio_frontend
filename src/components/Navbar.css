@@ -1,201 +1,57 @@
+/* src/components/Navbar.css */
+
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 1000;
-
+  z-index: 100;
   width: 100%;
-
   backdrop-filter: blur(18px);
-
   background:
     linear-gradient(
-      to bottom,
-      rgba(2, 6, 23, 0.88),
-      rgba(2, 6, 23, 0.72)
+      180deg,
+      rgba(15, 23, 42, 0.92),
+      rgba(15, 23, 42, 0.78)
     );
-
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.06);
 }
 
 .navbar__container {
   width: 100%;
-  max-width: 1350px;
-
-  margin: 0 auto;
-  padding: 1rem 1.5rem;
+  min-height: 72px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
+
+  gap: 1rem;
+
+  padding:
+    0.9rem
+    clamp(1rem, 3vw, 2rem);
 }
 
-/* =========================================
-   BRAND
-========================================= */
-
-.navbar__brand {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-
-  flex-shrink: 0;
-}
-
-.navbar__logo {
-  width: 46px;
-  height: 46px;
-  object-fit: contain;
-}
-
-.navbar__brand-name {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-
-  color: #f8fafc;
-}
-
-.navbar__brand-name span {
-  color: #a78bfa;
-}
-
-/* =========================================
-   NAVIGATION
-========================================= */
-
-.navbar__nav {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.navbar__link {
-  position: relative;
-
-  padding: 0.7rem 1rem;
-
-  border-radius: 12px;
-
-  font-size: 0.95rem;
-  font-weight: 500;
-
-  color: #94a3b8;
-  text-decoration: none;
-
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.navbar__link:hover {
-  background: rgba(124, 58, 237, 0.12);
-  color: #f8fafc;
-}
-
-.navbar__link:focus-visible {
-  outline: 2px solid #a78bfa;
-  outline-offset: 2px;
-}
-
-.navbar__link--active {
-  background: rgba(124, 58, 237, 0.18);
-  color: #ffffff;
-}
-
-/* =========================================
-   ACTIONS
-========================================= */
-
-.navbar__actions {
+.navbar__left {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-/* =========================================
-   PROFILE
-========================================= */
+.navbar__menu-button {
+  width: 42px;
+  height: 42px;
 
-.navbar__profile {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
-
-/* El contenedor del avatar */
-/* Asegura que el contenedor del avatar sea un círculo perfecto y controle el desborde */
-.navbar__avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #0056ff; /* Tu color principal de Roomix */
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden; /* Crucial para que la imagen no se salga del círculo */
-  flex-shrink: 0;   /* Evita que se aplaste si hay textos largos al lado */
-}
 
-/* Fuerza a la imagen de Google a llenar el contenedor sin deformarse */
-.navbar__avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Mantiene la proporción correcta recortando los bordes excedentes */
-  display: block;
-}
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
 
-/* Estilo para las iniciales de respaldo */
-.navbar__avatar-text {
-  color: #ffffff;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.navbar__profile-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.navbar__name {
-  margin: 0;
+  background:
+    rgba(255,255,255,0.04);
 
   color: #f8fafc;
-
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.navbar__username {
-  margin: 0;
-
-  color: #94a3b8;
-
-  font-size: 0.8rem;
-}
-
-/* =========================================
-   LOGOUT
-========================================= */
-
-.navbar__logout {
-  border: 1px solid rgba(239, 68, 68, 0.22);
-
-  background: rgba(239, 68, 68, 0.08);
-
-  color: #fca5a5;
-
-  padding: 0.72rem 1rem;
-
-  border-radius: 14px;
-
-  font-size: 0.88rem;
-  font-weight: 600;
 
   cursor: pointer;
 
@@ -205,22 +61,147 @@
     transform 0.2s ease;
 }
 
-.navbar__logout:hover {
-  background: rgba(239, 68, 68, 0.16);
+.navbar__menu-button:hover {
+  background:
+    rgba(167, 139, 250, 0.12);
 
-  border-color: rgba(239, 68, 68, 0.35);
+  border-color:
+    rgba(167, 139, 250, 0.35);
 
   transform: translateY(-1px);
 }
 
-.navbar__logout:focus-visible {
-  outline: 2px solid #f87171;
+.navbar__menu-button:focus-visible {
+  outline: 2px solid #a78bfa;
   outline-offset: 2px;
 }
 
+.navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.navbar__logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.navbar__brand-name {
+  font-family:
+    "Space Grotesk",
+    sans-serif;
+
+  font-size: 1.2rem;
+  font-weight: 700;
+
+  color: #f8fafc;
+
+  letter-spacing: -0.5px;
+}
+
+.navbar__brand-name span {
+  color: #a78bfa;
+}
+
+.navbar__center {
+  flex: 1;
+
+  display: flex;
+  justify-content: center;
+}
+
+.navbar__status {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+
+  padding:
+    0.55rem 1rem;
+
+  border:
+    1px solid rgba(255,255,255,0.06);
+
+  border-radius: 999px;
+
+  background:
+    rgba(255,255,255,0.03);
+}
+
+.navbar__status-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 999px;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 12px rgba(34,197,94,0.8);
+}
+
+.navbar__status-text {
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  color: #cbd5e1;
+
+  letter-spacing: 0.02em;
+}
+
+.navbar__actions {
+  display: flex;
+  align-items: center;
+}
+
+.navbar__logout {
+  border: none;
+
+  padding:
+    0.78rem 1rem;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(239,68,68,0.18),
+      rgba(239,68,68,0.1)
+    );
+
+  color: #fecaca;
+
+  font-size: 0.9rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    background 0.2s ease;
+}
+
+.navbar__logout:hover {
+  transform: translateY(-1px);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(239,68,68,0.24),
+      rgba(239,68,68,0.16)
+    );
+}
+
 .navbar__logout:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
+}
+
+.navbar__logout:focus-visible {
+  outline: 2px solid #fca5a5;
+  outline-offset: 2px;
 }
 
 /* =========================================
@@ -228,36 +209,36 @@
 ========================================= */
 
 @media (max-width: 900px) {
-  .navbar__container {
-    flex-wrap: wrap;
-  }
 
-  .navbar__nav {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .navbar__profile-info {
+  .navbar__center {
     display: none;
+  }
+
+  .navbar__container {
+    min-height: 68px;
   }
 }
 
 @media (max-width: 640px) {
-  .navbar__container {
-    padding: 1rem;
-  }
 
-  .navbar__nav {
-    gap: 0.25rem;
-  }
-
-  .navbar__link {
-    padding: 0.65rem 0.8rem;
-    font-size: 0.88rem;
+  .navbar__brand-name {
+    font-size: 1.05rem;
   }
 
   .navbar__logout {
-    padding: 0.65rem 0.85rem;
+    padding:
+      0.72rem 0.9rem;
+
+    font-size: 0.82rem;
+  }
+
+  .navbar__logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .navbar__menu-button {
+    width: 40px;
+    height: 40px;
   }
 }

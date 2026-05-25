@@ -1,9 +1,7 @@
 .rooms {
   position: relative;
-  min-height: 100vh;
   overflow: hidden;
   padding: 7rem 1.5rem 3rem;
-  background: var(--background);
 }
 
 .rooms__container {
@@ -142,29 +140,6 @@
   line-height: 1.6;
 }
 
-/* GLOWS */
-
-.rooms__glow {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.rooms__glow--top {
-  top: -100px;
-  left: -100px;
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
-}
-
-.rooms__glow--bottom {
-  bottom: -80px;
-  right: -80px;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(109,40,217,0.14) 0%, transparent 70%);
-}
 
 @media (max-width: 768px) {
   .rooms-create__form {

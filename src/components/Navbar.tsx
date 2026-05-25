@@ -1,111 +1,81 @@
 // src/components/Navbar.tsx
 
-import { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { Menu } from "lucide-react";
+
 import { useAuthStore } from "../store/useAuthStore";
 
 import logo from "../assets/LOGOROOMIX.png";
 
 import "./Navbar.css";
 
-export default function Navbar(): React.JSX.Element {
-  const { profile, logout, loading } = useAuthStore();
-  const [avatarError, setAvatarError] = useState<boolean>(false);
+interface Props {
+  onToggleSidebar: () => void;
+}
 
-  useEffect(() => {
-    setAvatarError(false);
-  }, [profile?.avatarUrl]);
+export default function Navbar({
+  onToggleSidebar,
+}: Props): React.JSX.Element {
 
-  const initials =
-    profile?.firstName && profile?.lastName
-      ? `${profile.firstName[0]}${profile.lastName[0]}`
-      : "RM";
+  const {
+    logout,
+    loading,
+  } = useAuthStore();
 
-  const handleLogout = async (): Promise<void> => {
-    await logout();
-  };
+  const handleLogout =
+    async (): Promise<void> => {
+      await logout();
+    };
 
   return (
     <header className="navbar">
+
       <div className="navbar__container">
 
         {/* LEFT */}
-        <div className="navbar__brand">
-          <img
-            src={logo}
-            alt="Roomix"
-            className="navbar__logo"
-          />
+        <div className="navbar__left">
 
-          <span className="navbar__brand-name">
-            Room<span>ix</span>
-          </span>
+          <button
+            type="button"
+            className="navbar__menu-button"
+            aria-label="Abrir menú lateral"
+            onClick={onToggleSidebar}
+          >
+            <Menu size={22} />
+          </button>
+
+          <div className="navbar__brand">
+
+            <img
+              src={logo}
+              alt="Roomix"
+              className="navbar__logo"
+            />
+
+            <span className="navbar__brand-name">
+              Room<span>ix</span>
+            </span>
+
+          </div>
+
         </div>
 
         {/* CENTER */}
-        <nav
-          className="navbar__nav"
-          aria-label="Navegación principal"
-        >
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              `navbar__link ${isActive ? "navbar__link--active" : ""}`
-            }
-          >
-            Dashboard
-          </NavLink>
+        <div className="navbar__center">
 
-          <NavLink
-            to="/rooms"
-            className={({ isActive }) =>
-              `navbar__link ${isActive ? "navbar__link--active" : ""}`
-            }
-          >
-            Salas
-          </NavLink>
+          <div className="navbar__status">
 
-          <NavLink
-            to="/profile"
-            className={({ isActive }) =>
-              `navbar__link ${isActive ? "navbar__link--active" : ""}`
-            }
-          >
-            Perfil
-          </NavLink>
-        </nav>
+            <span className="navbar__status-dot" />
+
+            <span className="navbar__status-text">
+              Online
+            </span>
+
+          </div>
+
+        </div>
 
         {/* RIGHT */}
         <div className="navbar__actions">
-
-          <div
-            className="navbar__profile"
-            aria-label="Perfil del usuario"
-          >
-            <div className="navbar__avatar">
-              {profile?.avatarUrl && !avatarError ? (
-                <img 
-                  src={profile.avatarUrl} 
-                  alt={`Avatar de ${profile.firstName}`} 
-                  className="navbar__avatar-img"
-                  referrerPolicy="no-referrer" 
-                  onError={() => setAvatarError(true)} 
-                />
-              ) : (
-                <span className="navbar__avatar-text">{initials}</span>
-              )}
-            </div>
-
-            <div className="navbar__profile-info">
-              <p className="navbar__name">
-                {profile?.firstName ?? "Usuario"}
-              </p>
-
-              <p className="navbar__username">
-                @{profile?.username ?? "roomix"}
-              </p>
-            </div>
-          </div>
 
           <button
             onClick={handleLogout}
@@ -113,10 +83,15 @@ export default function Navbar(): React.JSX.Element {
             aria-busy={loading}
             className="navbar__logout"
           >
-            {loading ? "Cerrando..." : "Salir"}
+            {loading
+              ? "Cerrando..."
+              : "Cerrar sesión"}
           </button>
+
         </div>
+
       </div>
+
     </header>
   );
 }

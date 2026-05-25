@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 
-import Navbar from "../../components/Navbar";
+import AppLayout from "../../layouts/AppLayout.tsx";
 import Button from "../../components/ui/Button";
 
 import RoomCard from "../../components/RoomCard/RoomCard.tsx";
@@ -96,13 +96,9 @@ export default function Rooms(): React.JSX.Element {
 
   return (
     <>
-      <Navbar />
+      <AppLayout>
 
       <main className="rooms">
-
-        {/* GLOWS */}
-        <div className="rooms__glow rooms__glow--top" />
-        <div className="rooms__glow rooms__glow--bottom" />
 
         <section className="rooms__container">
 
@@ -251,6 +247,7 @@ export default function Rooms(): React.JSX.Element {
 
         </section>
       </main>
+      </AppLayout>
     </>
   );
 }

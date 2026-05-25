@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import Navbar from "../../components/Navbar";
+import AppLayout from "../../layouts/AppLayout";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import {
@@ -140,13 +140,10 @@ export default function Profile(): React.JSX.Element {
 
   return (
     <>
-      <Navbar />
+      <AppLayout>
 
       <main className="profile">
 
-        {/* GLOWS */}
-        <div className="profile__glow profile__glow--top" />
-        <div className="profile__glow profile__glow--bottom" />
 
         <section className="profile__container">
 
@@ -305,6 +302,7 @@ export default function Profile(): React.JSX.Element {
 
         </section>
       </main>
+      </AppLayout>
     </>
   );
 }

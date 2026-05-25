@@ -1,0 +1,90 @@
+.app-layout {
+  min-height: 100vh;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(124, 58, 237, 0.12),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(59, 130, 246, 0.10),
+      transparent 35%
+    ),
+    var(--background);
+}
+
+/**
+ * =========================================
+ * CONTENT
+ * =========================================
+ */
+
+.app-layout__content {
+  min-height: 100vh;
+
+  padding:
+    calc(80px + 2rem)
+    1.25rem
+    2rem
+    1.25rem;
+
+  transition:
+    margin-left 0.25s ease,
+    padding 0.25s ease;
+}
+
+/**
+ * =========================================
+ * DESKTOP
+ * =========================================
+ */
+
+@media (min-width: 1024px) {
+
+  .app-layout__content {
+    padding:
+      calc(80px + 2rem)
+      2rem
+      2rem
+      2rem;
+  }
+
+  .app-layout__content--sidebar-open {
+    margin-left: 280px;
+  }
+}
+
+/**
+ * =========================================
+ * MOBILE OVERLAY
+ * =========================================
+ */
+
+.app-layout__overlay {
+  position: fixed;
+  inset: 0;
+
+  z-index: 80;
+
+  border: none;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  backdrop-filter: blur(2px);
+}
+
+/**
+ * =========================================
+ * REDUCE MOTION
+ * =========================================
+ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .app-layout__content,
+  .app-layout__overlay {
+    transition: none;
+  }
+}

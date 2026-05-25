@@ -9,7 +9,7 @@ import {
 
 import { useParams } from "react-router-dom";
 
-import Navbar from "../../components/Navbar";
+import AppLayout from "../../layouts/AppLayout";
 
 import Button from "../../components/ui/Button";
 
@@ -184,13 +184,10 @@ useEffect(() => {
 
   return (
     <>
-      <Navbar />
+      <AppLayout>
 
       <main className="room">
 
-        {/* GLOWS */}
-        <div className="room__glow room__glow--top" />
-        <div className="room__glow room__glow--bottom" />
 
         <section className="room__container">
 
@@ -300,6 +297,7 @@ useEffect(() => {
         </section>
 
       </main>
+      </AppLayout>
     </>
   );
 }

@@ -1,151 +1,316 @@
 // src/pages/Dashboard/Dashboard.tsx
 
-import Navbar from "../../components/Navbar";
+import { useEffect } from "react";
+import { useNavigate }
+from "react-router-dom";
 
-import logo from "../../assets/LOGOROOMIX.png";
+import AppLayout from "../../layouts/AppLayout";
 
 import { useAuthStore } from "../../store/useAuthStore";
+import { useRoomStore } from "../../store/useRoomStore";
+
+import emptyImage from "../../assets/IMAGVACIO.png";
 
 import "./Dashboard.css";
 
 export default function Dashboard(): React.JSX.Element {
-  const { profile } = useAuthStore();
+
+  const { profile } =
+    useAuthStore();
+
+  const navigate = useNavigate();
+
+  const {
+    rooms,
+    fetchMyRooms,
+  } = useRoomStore();
+
+  /**
+   * =========================================
+   * FETCH ROOMS
+   * =========================================
+   */
+
+  useEffect(() => {
+    fetchMyRooms();
+  }, [fetchMyRooms]);
 
   return (
-    <>
-      <Navbar />
+    <AppLayout>
 
       <main className="dashboard">
-
-        {/* GLOWS */}
-        <div className="dashboard__glow dashboard__glow--top" />
-        <div className="dashboard__glow dashboard__glow--bottom" />
 
         <section className="dashboard__container">
 
           {/* HERO */}
           <header className="dashboard__hero">
 
-            <img
-              src={logo}
-              alt="Roomix"
-              className="dashboard__logo"
-            />
+            <div className="dashboard__hero-content">
 
-            <h1 className="dashboard__title">
-              Bienvenido a <span>Roomix</span>
-            </h1>
+              <div className="dashboard__badge">
+                Plataforma colaborativa académica
+              </div>
 
-            <p className="dashboard__subtitle">
-              Un espacio colaborativo diseñado para
-              estudiar, comunicarte y compartir
-              en tiempo real con tus compañeros
-              y profesores.
-            </p>
+              <h1 className="dashboard__title">
+                Bienvenido,
+                <span>
+                  {" "}
+                  {profile?.firstName ?? "Usuario"}
+                </span>
+              </h1>
 
-            {/* USER CARD */}
-            <div className="dashboard__user-card">
-
-              <p className="dashboard__user-label">
-                Sesión iniciada como
+              <p className="dashboard__subtitle">
+                Gestiona tus salas, comunícate
+                en tiempo real y construye
+                espacios colaborativos de estudio
+                con Roomix.
               </p>
 
-              <h2 className="dashboard__user-name">
-                {profile?.firstName} {profile?.lastName}
-              </h2>
-              <p className="dashboard__user-username">
-                {profile?.email}
-              </p>
-
-              <p className="dashboard__user-username">
-                @{profile?.username}
-              </p>
             </div>
+
           </header>
 
-          {/* FEATURES */}
+          {/* STATS */}
           <section
-            aria-labelledby="features-title"
-            className="dashboard__features"
+            aria-labelledby="dashboard-stats-title"
+            className="dashboard-stats"
           >
-            <h2
-              id="features-title"
-              className="dashboard__features-title"
-            >
-              Próximamente en Roomix
-            </h2>
 
-            <div className="dashboard__features-grid">
+            <div className="dashboard-section__header">
 
-              {/* CARD */}
-              <article className="dashboard-feature-card">
-                <div className="dashboard-feature-card__icon">
-                  🎥
-                </div>
-
-                <h3 className="dashboard-feature-card__title">
-                  Videollamadas
-                </h3>
-
-                <p className="dashboard-feature-card__text">
-                  Conéctate con estudiantes y profesores
-                  mediante salas colaborativas en tiempo real.
+              <div>
+                <p className="dashboard-section__eyebrow">
+                  Resumen general
                 </p>
-              </article>
 
-              {/* CARD */}
-              <article className="dashboard-feature-card">
-                <div className="dashboard-feature-card__icon">
-                  💬
-                </div>
+                <h2
+                  id="dashboard-stats-title"
+                  className="dashboard-section__title"
+                >
+                  Actividad de tu cuenta
+                </h2>
+              </div>
 
-                <h3 className="dashboard-feature-card__title">
-                  Chat en vivo
-                </h3>
+            </div>
 
-                <p className="dashboard-feature-card__text">
-                  Comparte mensajes, ideas y recursos
-                  instantáneamente dentro de cada sala.
-                </p>
-              </article>
+            <div className="dashboard-stats__grid">
 
-              {/* CARD */}
-              <article className="dashboard-feature-card">
-                <div className="dashboard-feature-card__icon">
-                  👥
-                </div>
+              <article className="dashboard-stat-card">
 
-                <h3 className="dashboard-feature-card__title">
-                  Salones colaborativos
-                </h3>
-
-                <p className="dashboard-feature-card__text">
-                  Crea grupos privados de estudio para
-                  trabajar con tus compañeros.
-                </p>
-              </article>
-
-              {/* CARD */}
-              <article className="dashboard-feature-card">
-                <div className="dashboard-feature-card__icon">
+                <span className="dashboard-stat-card__icon">
                   📚
+                </span>
+
+                <div>
+                  <p className="dashboard-stat-card__label">
+                    Salas creadas
+                  </p>
+
+                  <h3 className="dashboard-stat-card__value">
+                    {rooms.length}
+                  </h3>
                 </div>
 
-                <h3 className="dashboard-feature-card__title">
-                  Recursos académicos
-                </h3>
+              </article>
 
-                <p className="dashboard-feature-card__text">
-                  Comparte archivos, enlaces y material
-                  educativo dentro de cada sesión.
-                </p>
+              <article className="dashboard-stat-card">
+
+                <span className="dashboard-stat-card__icon">
+                  👥
+                </span>
+
+                <div>
+                  <p className="dashboard-stat-card__label">
+                    Participantes
+                  </p>
+
+                  <h3 className="dashboard-stat-card__value">
+                    Próximamente
+                  </h3>
+                </div>
+
+              </article>
+
+              <article className="dashboard-stat-card">
+
+                <span className="dashboard-stat-card__icon">
+                  💬
+                </span>
+
+                <div>
+                  <p className="dashboard-stat-card__label">
+                    Mensajes
+                  </p>
+
+                  <h3 className="dashboard-stat-card__value">
+                    WebSockets activos
+                  </h3>
+                </div>
+
+              </article>
+
+              <article className="dashboard-stat-card">
+
+                <span className="dashboard-stat-card__icon">
+                  ⚡
+                </span>
+
+                <div>
+                  <p className="dashboard-stat-card__label">
+                    Actividad
+                  </p>
+
+                  <h3 className="dashboard-stat-card__value">
+                    En tiempo real
+                  </h3>
+                </div>
+
               </article>
 
             </div>
+
+          </section>
+
+          {/* ROOMS STATE */}
+          <section
+            aria-labelledby="dashboard-rooms-title"
+            className="dashboard-rooms"
+          >
+
+            <div className="dashboard-section__header">
+
+              <div>
+
+                <p className="dashboard-section__eyebrow">
+                  Gestión de salas
+                </p>
+
+                <h2
+                  id="dashboard-rooms-title"
+                  className="dashboard-section__title"
+                >
+                  Tus espacios colaborativos
+                </h2>
+
+              </div>
+
+            </div>
+
+            {rooms.length === 0 ? (
+
+              <div
+                  className="dashboard-empty"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Ir a crear salas"
+                  onClick={() => navigate("/rooms")}
+                  onKeyDown={(e) => {
+                    if (
+                      e.key === "Enter" ||
+                      e.key === " "
+                    ) {
+                      navigate("/rooms");
+                    }
+                  }}
+                >
+
+                <div className="dashboard-empty__image-wrapper">
+
+                  <img
+                    src={emptyImage}
+                    alt="Sin salas creadas"
+                    className="dashboard-empty__image"
+                  />
+
+                </div>
+
+                <div className="dashboard-empty__content">
+
+                  <span className="dashboard-empty__badge">
+                    Estado vacío detectado
+                  </span>
+
+                  <h3 className="dashboard-empty__title">
+                    Aún no has creado salas
+                  </h3>
+
+                  <p className="dashboard-empty__text">
+                    Comienza creando tu primera
+                    sala colaborativa para invitar
+                    compañeros, comunicarte en
+                    tiempo real y organizar sesiones
+                    de estudio dentro de Roomix.
+                  </p>
+                  <div className="dashboard-empty__action">
+
+                      <span className="dashboard-empty__action-icon">
+                        →
+                      </span>
+
+                      <span className="dashboard-empty__action-text">
+                        Haz clic aquí para crear tu primera sala
+                      </span>
+
+                    </div>
+
+                </div>
+
+              </div>
+
+            ) : (
+
+              <div className="dashboard-rooms__grid">
+
+                {rooms.map((room) => (
+
+                  <article
+                      key={room.id}
+                      className="dashboard-room-card"
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Entrar a la sala ${room.name}`}
+                      onClick={() =>
+                        navigate(`/room/${room.id}`)
+                      }
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "Enter" ||
+                          e.key === " "
+                        ) {
+                          navigate(`/room/${room.id}`);
+                        }
+                      }}
+                    >
+
+                    <div className="dashboard-room-card__top">
+
+                      <span className="dashboard-room-card__status">
+                        Activa
+                      </span>
+
+                    </div>
+
+                    <h3 className="dashboard-room-card__title">
+                      {room.name}
+                    </h3>
+
+                    <p className="dashboard-room-card__id">
+                      ID: {room.id}
+                    </p>
+
+                  </article>
+                ))}
+
+              </div>
+
+            )}
+
           </section>
 
         </section>
+
       </main>
-    </>
+
+    </AppLayout>
   );
 }

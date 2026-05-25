@@ -1,13 +1,9 @@
 .profile {
   position: relative;
 
-  min-height: 100vh;
-
   overflow: hidden;
 
   padding: 5rem 1.5rem;
-
-  background: var(--background);
 
   color: white;
 }
@@ -24,40 +20,6 @@
   max-width: 1280px;
 
   margin: 0 auto;
-}
-
-/* =========================================
-   GLOWS
-========================================= */
-
-.profile__glow {
-  position: absolute;
-
-  border-radius: 999px;
-
-  pointer-events: none;
-
-  filter: blur(90px);
-}
-
-.profile__glow--top {
-  top: -120px;
-  left: -120px;
-
-  width: 420px;
-  height: 420px;
-
-  background: rgba(124, 58, 237, 0.18);
-}
-
-.profile__glow--bottom {
-  right: -120px;
-  bottom: -120px;
-
-  width: 380px;
-  height: 380px;
-
-  background: rgba(168, 85, 247, 0.12);
 }
 
 /* =========================================

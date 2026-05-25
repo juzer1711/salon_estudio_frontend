@@ -1,12 +1,6 @@
 .room {
   position: relative;
-  min-height: 100vh;
   overflow: hidden;
-  background:
-    radial-gradient(circle at top,
-      rgba(124, 58, 237, 0.12),
-      transparent 35%),
-    #020617;
   padding: 6rem 1.5rem 3rem;
 }
 
@@ -15,29 +9,6 @@
   z-index: 2;
   max-width: 1100px;
   margin: 0 auto;
-}
-
-.room__glow {
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(120px);
-  opacity: 0.18;
-}
-
-.room__glow--top {
-  top: -120px;
-  right: -80px;
-  width: 320px;
-  height: 320px;
-  background: #7c3aed;
-}
-
-.room__glow--bottom {
-  bottom: -120px;
-  left: -80px;
-  width: 320px;
-  height: 320px;
-  background: #2563eb;
 }
 
 .room__header {
