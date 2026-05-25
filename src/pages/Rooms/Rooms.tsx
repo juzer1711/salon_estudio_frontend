@@ -7,12 +7,14 @@ import {
 } from "react";
 
 import AppLayout from "../../layouts/AppLayout.tsx";
-import Button from "../../components/ui/Button";
 
+import Button from "../../components/ui/Button";
 import RoomCard from "../../components/RoomCard/RoomCard.tsx";
 
 import { useRoomStore } from "../../store/useRoomStore";
 import { useSnackbar } from "../../context/SnackbarContext";
+
+import emptyImage from "../../assets/IMAGVACIO.png";
 
 import "./Rooms.css";
 
@@ -20,14 +22,16 @@ export default function Rooms(): React.JSX.Element {
 
   const {
     rooms,
-    loading,
+    isCreatingRoom,
+    isFetchingRooms,
     error,
     fetchMyRooms,
     createNewRoom,
     clearError,
   } = useRoomStore();
 
-  const { showSnackbar } = useSnackbar();
+  const { showSnackbar } =
+    useSnackbar();
 
   const [roomName, setRoomName] =
     useState<string>("");
@@ -52,9 +56,11 @@ export default function Rooms(): React.JSX.Element {
    */
 
   useEffect(() => {
+
     if (error) {
       showSnackbar(error, "error");
     }
+
   }, [error, showSnackbar]);
 
   /**
@@ -73,6 +79,7 @@ export default function Rooms(): React.JSX.Element {
     setRoomError("");
 
     if (!roomName.trim()) {
+
       setRoomError(
         "Debes ingresar un nombre para la sala."
       );
@@ -95,29 +102,76 @@ export default function Rooms(): React.JSX.Element {
   };
 
   return (
-    <>
-      <AppLayout>
+    <AppLayout>
 
       <main className="rooms">
 
         <section className="rooms__container">
 
-          {/* HEADER */}
-          <header className="rooms__header">
+          {/* HERO */}
+          <header className="rooms__hero">
 
-            <div>
-              <h1 className="rooms__title">
-                Mis Salas
-              </h1>
-
-              <p className="rooms__subtitle">
-                Gestiona y crea espacios
-                colaborativos para estudiar
-                en tiempo real.
-              </p>
+            <div className="rooms__badge">
+              Gestión colaborativa
             </div>
 
+            <h1 className="rooms__title">
+              Tus salas de estudio
+            </h1>
+
+            <p className="rooms__subtitle">
+              Crea espacios colaborativos,
+              organiza sesiones académicas
+              y comunícate en tiempo real
+              con otros participantes.
+            </p>
+
           </header>
+
+          {/* STATS */}
+          <section className="rooms-stats">
+
+            <article className="rooms-stat-card">
+
+              <span>
+                📚
+              </span>
+
+              <div>
+
+                <p>
+                  Total salas
+                </p>
+
+                <h3>
+                  {rooms.length}
+                </h3>
+
+              </div>
+
+            </article>
+
+            <article className="rooms-stat-card">
+
+              <span>
+                ⚡
+              </span>
+
+              <div>
+
+                <p>
+                  Estado
+                </p>
+
+                <h3>
+                  Tiempo real
+                </h3>
+
+              </div>
+
+            </article>
+
+          </section>
 
           {/* CREATE ROOM */}
           <section
@@ -164,6 +218,7 @@ export default function Rooms(): React.JSX.Element {
                 />
 
                 {roomError && (
+
                   <p
                     id="room-error"
                     role="alert"
@@ -171,16 +226,19 @@ export default function Rooms(): React.JSX.Element {
                   >
                     {roomError}
                   </p>
+
                 )}
 
               </div>
 
               <Button
                 type="submit"
-                disabled={loading}
-                className="rooms-create__button" 
+                disabled={isCreatingRoom}
+                className="rooms-create__button"
               >
-                {loading ? "Creando..." : "Crear sala"}
+                {isCreatingRoom
+                    ? "Creando..."
+                    : "Crear sala"}
               </Button>
 
             </form>
@@ -207,24 +265,65 @@ export default function Rooms(): React.JSX.Element {
               </span>
 
             </div>
+            {isFetchingRooms ? (
 
-            {rooms.length === 0 ? (
+              <div className="rooms-grid">
+
+                {Array.from({ length: 6 }).map((_, index) => (
+
+                  <div
+                    key={index}
+                    className="rooms-skeleton"
+                  />
+
+                ))}
+
+              </div>
+
+            ) :
+            rooms.length === 0 ? (
 
               <div className="rooms-empty">
 
-                <div className="rooms-empty__icon">
-                  📚
+                <div className="rooms-empty__image-wrapper">
+
+                  <img
+                    src={emptyImage}
+                    alt="Sin salas creadas"
+                    className="rooms-empty__image"
+                  />
+
                 </div>
 
-                <h3 className="rooms-empty__title">
-                  Aún no tienes salas
-                </h3>
+                <div className="rooms-empty__content">
 
-                <p className="rooms-empty__text">
-                  Crea tu primera sala
-                  colaborativa para comenzar
-                  a estudiar con otros usuarios.
-                </p>
+                  <span className="rooms-empty__badge">
+                    Estado vacío
+                  </span>
+
+                  <h3 className="rooms-empty__title">
+                    Aún no has creado salas
+                  </h3>
+
+                  <p className="rooms-empty__text">
+                    Crea tu primera sala colaborativa
+                    para comenzar sesiones académicas
+                    en tiempo real dentro de Roomix.
+                  </p>
+
+                  <button
+                    type="button"
+                    className="rooms-empty__cta"
+                    onClick={() => {
+                      document
+                        .getElementById("room-name")
+                        ?.focus();
+                    }}
+                  >
+                    Crear mi primera sala
+                  </button>
+
+                </div>
 
               </div>
 
@@ -233,10 +332,12 @@ export default function Rooms(): React.JSX.Element {
               <div className="rooms-grid">
 
                 {rooms.map((room) => (
+
                   <RoomCard
                     key={room.id}
                     room={room}
                   />
+
                 ))}
 
               </div>
@@ -246,8 +347,9 @@ export default function Rooms(): React.JSX.Element {
           </section>
 
         </section>
+
       </main>
-      </AppLayout>
-    </>
+
+    </AppLayout>
   );
 }

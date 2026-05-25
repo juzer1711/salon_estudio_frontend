@@ -10,7 +10,8 @@ interface RoomState {
 
   rooms: StudyRoom[];
 
-  loading: boolean;
+  isFetchingRooms: boolean;
+  isCreatingRoom: boolean;
 
   error: string | null;
 
@@ -32,7 +33,8 @@ export const useRoomStore =
 
     rooms: [],
 
-    loading: false,
+    isFetchingRooms: false,
+    isCreatingRoom: false,
 
     error: null,
 
@@ -46,7 +48,7 @@ export const useRoomStore =
       try {
 
         set({
-          loading: true,
+          isFetchingRooms: true,
           error: null,
         });
 
@@ -55,13 +57,13 @@ export const useRoomStore =
 
         set({
           rooms,
-          loading: false,
+          isFetchingRooms: false,
         });
 
       } catch (error) {
 
         set({
-          loading: false,
+          isFetchingRooms: false,
           error:
             error instanceof Error
               ? error.message
@@ -82,7 +84,7 @@ export const useRoomStore =
       try {
 
         set({
-          loading: true,
+           isCreatingRoom: true,
           error: null,
         });
 
@@ -98,7 +100,7 @@ export const useRoomStore =
 
         set({
           rooms,
-          loading: false,
+           isCreatingRoom: false,
         });
 
         return data.roomId;
@@ -106,7 +108,7 @@ export const useRoomStore =
       } catch (error) {
 
         set({
-          loading: false,
+           isCreatingRoom: false,
           error:
             error instanceof Error
               ? error.message
