@@ -5,7 +5,7 @@ import {
 } from "react";
 
 import Navbar from "../components/Navbar.tsx";
-import Sidebar from "../components/SideBar.tsx";
+import Sidebar from "../components/Sidebar.tsx";
 import "./AppLayout.css";
 
 interface Props {
