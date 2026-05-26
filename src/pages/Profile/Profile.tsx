@@ -25,6 +25,7 @@ export default function Profile(): React.JSX.Element {
 
   const {
     profile,
+    loading,
     isUpdatingProfile,
     error,
     checkUsername,
