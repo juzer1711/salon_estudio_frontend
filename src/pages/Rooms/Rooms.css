@@ -532,3 +532,166 @@
     transform: translateX(100%);
   }
 }
+
+.rooms-found {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+
+  border-radius: 24px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(124,58,237,0.22),
+      rgba(59,130,246,0.12)
+    );
+
+  border: 1px solid rgba(124,58,237,0.25);
+
+  backdrop-filter: blur(14px);
+}
+
+.rooms-found__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 72px;
+  width: 72px;
+  height: 72px;
+
+  border-radius: 20px;
+
+  background:
+    rgba(255,255,255,0.06);
+
+  font-size: 2rem;
+}
+
+.rooms-found__content {
+  flex: 1;
+}
+
+.rooms-found__badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(124,58,237,0.18);
+
+  color: #c4b5fd;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.rooms-found__title {
+  margin-top: .7rem;
+
+  font-size: 1.4rem;
+  font-weight: 700;
+
+  color: #f8fafc;
+}
+
+.rooms-found__text {
+  margin-top: .35rem;
+
+  color: var(--text-secondary);
+}
+
+.rooms-found__meta {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+
+  margin-top: 1rem;
+}
+
+.rooms-found__id,
+.rooms-found__status {
+  padding: 8px 12px;
+
+  border-radius: 12px;
+
+  background:
+    rgba(255,255,255,0.05);
+
+  color: #e2e8f0;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rooms-found__status {
+  color: #86efac;
+}
+
+.rooms-found__actions {
+  display: flex;
+  gap: .8rem;
+}
+
+.rooms-found__cancel,
+.rooms-found__enter {
+  border: none;
+
+  height: 48px;
+  padding: 0 20px;
+
+  border-radius: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    transform .2s ease,
+    opacity .2s ease;
+}
+
+.rooms-found__cancel {
+  background:
+    rgba(255,255,255,0.06);
+
+  color: #e2e8f0;
+}
+
+.rooms-found__enter {
+  background: #7c3aed;
+  color: white;
+}
+
+.rooms-found__cancel:hover,
+.rooms-found__enter:hover {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+
+  .rooms-found {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .rooms-found__actions {
+    width: 100%;
+  }
+
+  .rooms-found__cancel,
+  .rooms-found__enter {
+    flex: 1;
+  }
+}
