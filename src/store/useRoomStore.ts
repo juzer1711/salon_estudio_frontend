@@ -13,6 +13,7 @@ interface RoomState {
 
   isFetchingRooms: boolean;
   isCreatingRoom: boolean;
+  isSearchingRoom: boolean;
 
   error: string | null;
 
@@ -40,6 +41,7 @@ export const useRoomStore =
 
     isFetchingRooms: false,
     isCreatingRoom: false,
+    isSearchingRoom: false,
 
     error: null,
 
@@ -136,7 +138,7 @@ export const useRoomStore =
       try {
 
         set({
-          loading: true,
+          isSearchingRoom: true,
           error: null,
         });
 
@@ -144,7 +146,7 @@ export const useRoomStore =
           await getRoomById(roomId);
 
         set({
-          loading: false,
+          isSearchingRoom: false,
         });
 
         return room;
@@ -152,7 +154,7 @@ export const useRoomStore =
       } catch (error) {
 
         set({
-          loading: false,
+          isSearchingRoom: false,
           error:
             error instanceof Error
               ? error.message

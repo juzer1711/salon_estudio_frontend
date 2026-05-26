@@ -46,13 +46,8 @@ export default function Room(): React.JSX.Element {
   const { profile } =
     useAuthStore();
 
-  const { rooms } =
+  const { searchRoomById } =
     useRoomStore();
-
-  const currentRoom =
-    rooms.find(
-      (room) => room.id === roomId
-    );
 
   const [message, setMessage] =
     useState<string>("");
@@ -60,8 +55,46 @@ export default function Room(): React.JSX.Element {
   const [messages, setMessages] =
     useState<ChatMessage[]>([]);
 
+  const [currentRoom, setCurrentRoom] =
+    useState<any>(null);
+
   const messagesEndRef =
     useRef<HTMLDivElement | null>(null);
+
+  /**
+   * =========================================
+   * LOAD ROOM
+   * =========================================
+   */
+
+  useEffect(() => {
+
+    const loadRoom = async () => {
+
+      if (!roomId) {
+        return;
+      }
+
+      const room =
+        await searchRoomById(roomId);
+
+      if (!room) {
+
+        navigate("/rooms");
+
+        return;
+      }
+
+      setCurrentRoom(room);
+    };
+
+    loadRoom();
+
+  }, [
+    roomId,
+    searchRoomById,
+    navigate,
+  ]);
 
   /**
    * =========================================
