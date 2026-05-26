@@ -1,10 +1,7 @@
 .profile {
   position: relative;
-
   overflow: hidden;
-
   padding: 5rem 1.5rem;
-
   color: white;
 }
 
@@ -31,7 +28,7 @@
 }
 
 .profile__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
 
   font-size: clamp(2.5rem, 6vw, 4rem);
 
@@ -86,6 +83,14 @@
   text-align: center;
 }
 
+.profile-card__avatar-wrapper {
+  position: relative;
+
+  width: fit-content;
+
+  margin: 0 auto 1.5rem;
+}
+
 .profile-card__avatar {
   width: 120px;
   height: 120px;
@@ -122,6 +127,50 @@
 
   font-size: 2rem;
   font-weight: 700;
+}
+
+.profile-card__avatar-edit {
+  position: absolute;
+
+  right: 0;
+  bottom: 0;
+
+  width: 42px;
+  height: 42px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #3b82f6
+    );
+
+  color: white;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1rem;
+
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.25);
+
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.profile-card__avatar-edit:hover {
+  transform: scale(1.08);
+
+  opacity: 0.95;
 }
 
 .profile-card__name {
@@ -188,8 +237,151 @@
   color: #f8fafc;
 }
 
+/* =========================================
+   USERNAME INPUT STATES
+========================================= */
+
+.profile-form__username-wrapper {
+  border-radius: 16px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.profile-form__username-wrapper--success {
+  box-shadow:
+    0 0 0 2px rgba(74, 222, 128, 0.45);
+}
+
+.profile-form__username-wrapper--checking {
+  box-shadow:
+    0 0 0 2px rgba(250, 204, 21, 0.4);
+}
+
+.profile-form__username-wrapper--error {
+  box-shadow:
+    0 0 0 2px rgba(248, 113, 113, 0.4);
+}
+
+/* =========================================
+   USERNAME STATUS
+========================================= */
+
+.profile-form__username-status {
+  margin-top: 0.2rem;
+
+  padding-left: 0.2rem;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+
+  animation: profile-status-fade 0.18s ease;
+}
+
+.profile-form__username-status--checking {
+  color: #facc15;
+}
+
+.profile-form__username-status--available {
+  color: #4ade80;
+}
+
+.profile-form__username-status--taken,
+.profile-form__username-status--error {
+  color: #f87171;
+}
+
+@keyframes profile-status-fade {
+
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
+   FORM ACTIONS
+========================================= */
+
 .profile-form__actions {
-  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  gap: 0.85rem;
+}
+
+.profile-form__submit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.7rem;
+
+  min-width: 220px;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.profile-form__submit-button--loading {
+  opacity: 0.85;
+
+  transform: scale(0.98);
+
+  cursor: not-allowed;
+}
+
+.profile-form__spinner {
+  width: 18px;
+  height: 18px;
+
+  border-radius: 50%;
+
+  border: 2px solid rgba(255, 255, 255, 0.2);
+
+  border-top-color: #ffffff;
+
+  animation: profile-spin 0.7s linear infinite;
+}
+
+.profile-form__loading-text {
+  font-size: 13px;
+
+  color: #94a3b8;
+
+  animation: profile-fade 0.2s ease;
+}
+
+@keyframes profile-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes profile-fade {
+
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .profile-form__error {

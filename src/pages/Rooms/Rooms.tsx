@@ -16,6 +16,8 @@ import { useSnackbar } from "../../context/SnackbarContext";
 
 import emptyImage from "../../assets/IMAGVACIO.png";
 
+import { BookOpen, Zap } from "lucide-react";
+
 import "./Rooms.css";
 
 export default function Rooms(): React.JSX.Element {
@@ -134,7 +136,7 @@ export default function Rooms(): React.JSX.Element {
             <article className="rooms-stat-card">
 
               <span>
-                📚
+                <BookOpen size={36} color="#a78bfa" />
               </span>
 
               <div>
@@ -154,7 +156,7 @@ export default function Rooms(): React.JSX.Element {
             <article className="rooms-stat-card">
 
               <span>
-                ⚡
+                <Zap size={36} color="#a78bfa" />
               </span>
 
               <div>

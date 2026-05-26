@@ -16,6 +16,8 @@ import AppLayout from "../../layouts/AppLayout";
 
 import Button from "../../components/ui/Button";
 
+import { MessageSquareOff } from "lucide-react";
+
 import { socket }
 from "../../services/socket";
 
@@ -235,7 +237,7 @@ export default function Room(): React.JSX.Element {
                 <div className="room-chat__empty">
 
                   <span>
-                    💬
+                    <MessageSquareOff size={48} color="#a78bfa" />
                   </span>
 
                   <p>

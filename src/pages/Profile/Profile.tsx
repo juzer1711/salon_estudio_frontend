@@ -14,14 +14,20 @@ import {
   type UpdateProfileDTO,
 } from "../../store/useAuthStore";
 
+import AvatarPicker
+from "../../components/AvatarPicker/AvatarPicker";
+
+import { Pencil } from "lucide-react";
+
 import "./Profile.css";
 
 export default function Profile(): React.JSX.Element {
 
   const {
     profile,
-    loading,
+    isUpdatingProfile,
     error,
+    checkUsername,
     updateUserProfile,
     removeAccount,
     clearError,
@@ -32,6 +38,27 @@ export default function Profile(): React.JSX.Element {
   }, []);
 
   const { showSnackbar } = useSnackbar();
+
+  const [
+    isAvatarPickerOpen,
+    setIsAvatarPickerOpen,
+  ] = useState(false);
+
+  const [avatarError, setAvatarError] =
+  useState(false);
+
+  type UsernameStatus =
+  | "idle"
+  | "checking"
+  | "available"
+  | "taken"
+  | "error";
+
+  const [usernameStatus, setUsernameStatus] =
+  useState<UsernameStatus>("idle");
+
+  const [usernameMessage, setUsernameMessage] =
+    useState("");
 
   const [formData, setFormData] =
     useState<UpdateProfileDTO>({
@@ -56,6 +83,95 @@ export default function Profile(): React.JSX.Element {
 
   }, [profile]);
 
+  useEffect(() => {
+  setAvatarError(false);
+}, [formData.avatarUrl]);
+
+useEffect(() => {
+
+  const username =
+    formData.username
+      .trim()
+      .toLowerCase();
+
+  /**
+   * IGNORAR username original
+   */
+
+  if (
+    !username ||
+    username === profile?.username
+  ) {
+
+    setUsernameStatus("idle");
+
+    setUsernameMessage("");
+
+    return;
+  }
+
+  if (username.length < 3) {
+
+    setUsernameStatus("error");
+
+    setUsernameMessage(
+      "Mínimo 3 caracteres."
+    );
+
+    return;
+  }
+
+  const timeout =
+    setTimeout(async () => {
+
+      try {
+
+        setUsernameStatus("checking");
+
+        setUsernameMessage(
+          "Verificando username..."
+        );
+
+        const available =
+          await checkUsername(username);
+
+        if (available) {
+
+          setUsernameStatus("available");
+
+          setUsernameMessage(
+            "Username disponible."
+          );
+
+        } else {
+
+          setUsernameStatus("taken");
+
+          setUsernameMessage(
+            "Este username ya está ocupado."
+          );
+        }
+
+      } catch {
+
+        setUsernameStatus("error");
+
+        setUsernameMessage(
+          "No se pudo verificar."
+        );
+      }
+
+    }, 600);
+
+  return () =>
+    clearTimeout(timeout);
+
+}, [
+  formData.username,
+  profile?.username,
+  checkUsername,
+]);
+
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ): void => {
@@ -67,6 +183,21 @@ export default function Profile(): React.JSX.Element {
       [name]: value,
     }));
   };
+
+  const handleAvatarSave = (
+    avatarUrl: string
+  ): void => {
+
+    setFormData((prev) => ({
+      ...prev,
+      avatarUrl,
+    }));
+  };
+
+  const isUsernameInvalid =
+  usernameStatus === "taken" ||
+  usernameStatus === "checking" ||
+  usernameStatus === "error";
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
@@ -101,6 +232,7 @@ export default function Profile(): React.JSX.Element {
         "El apellido solo puede contener letras.",
         "error"
       );
+
 
       return;
     }
@@ -165,23 +297,43 @@ export default function Profile(): React.JSX.Element {
             {/* PROFILE CARD */}
             <aside className="profile-card">
 
-              <div className="profile-card__avatar">
-                {profile?.avatarUrl &&
-                profile.avatarUrl.startsWith("http") ? (
-                  <img
-                    src={profile.avatarUrl}
-                    alt="Avatar"
-                    className="profile-card__avatar-image"
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                ) : (
-                  <span className="profile-card__avatar-text">
-                    {initials}
-                  </span>
-                )}
+              <div className="profile-card__avatar-wrapper">
+
+                <div className="profile-card__avatar">
+
+                  {formData.avatarUrl &&
+                      !avatarError ? (
+
+                        <img
+                          src={formData.avatarUrl}
+                          alt="Avatar"
+                          className="profile-card__avatar-image"
+                          referrerPolicy="no-referrer"
+                          onError={() => {
+                            setAvatarError(true);
+                          }}
+                        />
+
+                      ) : (
+
+                        <span className="profile-card__avatar-text">
+                          {initials}
+                        </span>
+
+                      )}
+
+                </div>
+
+                <button
+                  type="button"
+                  className="profile-card__avatar-edit"
+                  onClick={() =>
+                    setIsAvatarPickerOpen(true)
+                  }
+                >
+                  <Pencil size={20} color="#a78bfa" />
+                </button>
+
               </div>
 
               <h2 className="profile-card__name">
@@ -232,12 +384,45 @@ export default function Profile(): React.JSX.Element {
                   <div className="profile-form__field">
                     <label>Username</label>
 
-                    <Input
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      placeholder="Username"
-                    />
+                    <div
+                        className={`profile-form__username-wrapper
+                        ${
+                          usernameStatus === "available"
+                            ? "profile-form__username-wrapper--success"
+                            : ""
+                        }
+                        ${
+                          usernameStatus === "taken" ||
+                          usernameStatus === "error"
+                            ? "profile-form__username-wrapper--error"
+                            : ""
+                        }
+                        ${
+                          usernameStatus === "checking"
+                            ? "profile-form__username-wrapper--checking"
+                            : ""
+                        }`}
+                      >
+
+                        <Input
+                          name="username"
+                          value={formData.username}
+                          onChange={handleChange}
+                          placeholder="Username"
+                        />
+
+                      </div>
+
+                    <div
+                      className={`
+                        profile-form__username-status
+                        profile-form__username-status--${usernameStatus}
+                      `}
+                    >
+
+                      {usernameMessage}
+
+                    </div>
                   </div>
 
                   <div className="profile-form__field">
@@ -253,26 +438,41 @@ export default function Profile(): React.JSX.Element {
                   </div>
                 </div>
 
-                <div className="profile-form__field">
-                  <label>Avatar URL</label>
 
-                  <Input
-                    name="avatarUrl"
-                    value={formData.avatarUrl}
-                    onChange={handleChange}
-                    placeholder="https://..."
-                  />
-                </div>
 
                 <div className="profile-form__actions">
+
                   <Button
                     type="submit"
-                    disabled={loading}
+                    disabled={isUpdatingProfile||
+                      isUsernameInvalid
+                    }
+                    className={`
+                      profile-form__submit-button
+                      ${isUpdatingProfile
+                        ? "profile-form__submit-button--loading"
+                        : ""}
+                    `}
                   >
-                    {loading
-                      ? "Guardando..."
+
+                    {isUpdatingProfile && (
+                      <span className="profile-form__spinner" />
+                    )}
+
+                    {isUpdatingProfile
+                      ? "Guardando cambios..."
                       : "Guardar cambios"}
+
                   </Button>
+
+                  {isUpdatingProfile && (
+
+                    <p className="profile-form__loading-text">
+                      Actualizando información del perfil...
+                    </p>
+
+                  )}
+
                 </div>
               </form>
             </section>
@@ -302,6 +502,15 @@ export default function Profile(): React.JSX.Element {
 
         </section>
       </main>
+      <AvatarPicker
+          isOpen={isAvatarPickerOpen}
+          onClose={() =>
+            setIsAvatarPickerOpen(false)
+          }
+          onSave={handleAvatarSave}
+          currentAvatar={formData.avatarUrl}
+          initials={initials}
+        />
       </AppLayout>
     </>
   );

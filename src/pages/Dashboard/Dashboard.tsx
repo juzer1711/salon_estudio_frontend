@@ -10,6 +10,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useRoomStore } from "../../store/useRoomStore";
 
 import emptyImage from "../../assets/IMAGVACIO.png";
+import { BookOpen, Users, MessageCircle, Zap, ArrowRight } from "lucide-react";
 
 import "./Dashboard.css";
 
@@ -98,7 +99,7 @@ export default function Dashboard(): React.JSX.Element {
               <article className="dashboard-stat-card">
 
                 <span className="dashboard-stat-card__icon">
-                  📚
+                  <BookOpen size={24} color="#a78bfa" />
                 </span>
 
                 <div>
@@ -116,7 +117,7 @@ export default function Dashboard(): React.JSX.Element {
               <article className="dashboard-stat-card">
 
                 <span className="dashboard-stat-card__icon">
-                  👥
+                  <Users size={24} color="#a78bfa" />
                 </span>
 
                 <div>
@@ -134,7 +135,7 @@ export default function Dashboard(): React.JSX.Element {
               <article className="dashboard-stat-card">
 
                 <span className="dashboard-stat-card__icon">
-                  💬
+                  <MessageCircle size={24} color="#a78bfa" />
                 </span>
 
                 <div>
@@ -152,7 +153,7 @@ export default function Dashboard(): React.JSX.Element {
               <article className="dashboard-stat-card">
 
                 <span className="dashboard-stat-card__icon">
-                  ⚡
+                  <Zap size={24} color="#a78bfa" />
                 </span>
 
                 <div>
@@ -244,7 +245,7 @@ export default function Dashboard(): React.JSX.Element {
                   <div className="dashboard-empty__action">
 
                       <span className="dashboard-empty__action-icon">
-                        →
+                        <ArrowRight size={16} color="#c4b5fd" />
                       </span>
 
                       <span className="dashboard-empty__action-text">

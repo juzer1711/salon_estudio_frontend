@@ -63,6 +63,8 @@ interface AuthState {
   /** Control de carga global */
   loading: boolean;
 
+  isUpdatingProfile: boolean;
+
   /** Mensajes de error accesibles para UI */
   error: string | null;
 
@@ -136,6 +138,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   loading: true,
+  isUpdatingProfile: false,
   error: null,
   needsUsername: false,
   authInitialized: false,
@@ -385,7 +388,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   updateUserProfile: async (profileData) => {
 
-    set({ error: null });
+    set({ isUpdatingProfile: true,
+      error: null });
 
     try {
 
@@ -404,6 +408,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({
         profile: meData.user,
+        isUpdatingProfile: false,
         error: null,
       });
 
@@ -413,6 +418,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({
         error: translateAuthError(error),
+        isUpdatingProfile: false,
       });
 
       return false;

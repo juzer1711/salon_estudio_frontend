@@ -8,6 +8,8 @@ from "../store/useRoomStore";
 
 import "./Sidebar.css";
 
+import { BookOpen, Library, Home, User} from "lucide-react";
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -97,7 +99,7 @@ export default function Sidebar({
             }`
           }
         >
-          🏠 Dashboard
+          <Home size={20} color="#a78bfa" />Dashboard
         </NavLink>
 
         <NavLink
@@ -111,7 +113,7 @@ export default function Sidebar({
             }`
           }
         >
-          📚 Mis salas
+          <Library size={20} color="#a78bfa" /> Mis salas
         </NavLink>
 
         <NavLink
@@ -125,7 +127,7 @@ export default function Sidebar({
             }`
           }
         >
-          👤 Perfil
+          <User size={20} color="#a78bfa" /> Perfil
         </NavLink>
 
       </nav>
@@ -164,7 +166,7 @@ export default function Sidebar({
                 className="sidebar__room-link"
               >
                 <span>
-                  📖
+                  <BookOpen size={20} color="#a78bfa" />
                 </span>
 
                 <div>
