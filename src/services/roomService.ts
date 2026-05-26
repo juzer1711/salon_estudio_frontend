@@ -130,3 +130,39 @@ export const getMyRooms = async (): Promise<StudyRoom[]> => {
 
   return data.rooms;
 };
+
+/**
+ * =========================================
+ * GET ROOM BY ID
+ * GET /api/v1/rooms/:roomId
+ * =========================================
+ */
+
+export const getRoomById = async (
+  roomId: string
+): Promise<StudyRoom> => {
+
+  const response = await fetch(
+    `${API_URL}/rooms/${roomId}`,
+    {
+      method: "GET",
+      headers: await getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+
+    const message =
+      await extractBackendError(
+        response,
+        "No fue posible obtener la sala."
+      );
+
+    throw new Error(message);
+  }
+
+  const data =
+    await response.json();
+
+  return data.room;
+};

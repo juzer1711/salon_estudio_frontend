@@ -69,6 +69,9 @@ export default function Profile(): React.JSX.Element {
       avatarUrl: "",
     });
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] =
+    useState<boolean>(false);
+
   useEffect(() => {
 
     if (!profile) return;
@@ -256,13 +259,11 @@ useEffect(() => {
 
   const handleDeleteAccount = async (): Promise<void> => {
 
-    const confirmed = window.confirm(
-      "¿Estás seguro de eliminar tu cuenta? Esta acción no se puede deshacer."
-    );
+    const success = await removeAccount();
 
-    if (!confirmed) return;
-
-    await removeAccount();
+    if (success) {
+      setIsDeleteModalOpen(false);
+    }
   };
 
   const initials =
@@ -493,12 +494,60 @@ useEffect(() => {
             </div>
 
             <button
-              onClick={handleDeleteAccount}
+              onClick={() => setIsDeleteModalOpen(true)}
               className="profile-danger__button"
             >
               Eliminar cuenta
             </button>
           </section>
+
+          {isDeleteModalOpen && (
+            <div className="delete-modal">
+
+              <div
+                className="delete-modal__backdrop"
+                onClick={() =>
+                  setIsDeleteModalOpen(false)
+                }
+              />
+
+              <div className="delete-modal__content">
+
+                <h3 className="delete-modal__title">
+                  Eliminar cuenta
+                </h3>
+
+                <p className="delete-modal__text">
+                  Esta acción eliminará permanentemente
+                  tu cuenta y toda tu información en Roomix.
+                </p>
+
+                <div className="delete-modal__actions">
+
+                  <button
+                    onClick={() =>
+                      setIsDeleteModalOpen(false)
+                    }
+                    
+                    className="delete-modal__cancel"
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={loading}
+                    className="delete-modal__confirm"
+                  >
+                    {loading
+                      ? "Eliminando..."
+                      : "Sí, eliminar"}
+                  </button>
+
+                </div>
+              </div>
+            </div>
+          )}
 
         </section>
       </main>

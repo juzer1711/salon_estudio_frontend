@@ -1,7 +1,6 @@
 // src/pages/Rooms/Rooms.tsx
 
 import {
-  type FormEvent,
   useEffect,
   useState,
 } from "react";
@@ -12,8 +11,11 @@ import Button from "../../components/ui/Button";
 import RoomCard from "../../components/RoomCard/RoomCard.tsx";
 
 import { useRoomStore } from "../../store/useRoomStore";
+import type { StudyRoom }
+  from "../../services/roomService";
 import { useSnackbar } from "../../context/SnackbarContext";
 
+import { useNavigate } from "react-router-dom";
 import emptyImage from "../../assets/IMAGVACIO.png";
 
 import { BookOpen, Zap } from "lucide-react";
@@ -26,20 +28,30 @@ export default function Rooms(): React.JSX.Element {
     rooms,
     isCreatingRoom,
     isFetchingRooms,
+    isSearchingRoom,
     error,
     fetchMyRooms,
     createNewRoom,
     clearError,
+    searchRoomById,
   } = useRoomStore();
 
   const { showSnackbar } =
     useSnackbar();
 
+  const navigate = useNavigate();
+
   const [roomName, setRoomName] =
+    useState<string>("");
+
+  const [searchRoomId, setSearchRoomId] =
     useState<string>("");
 
   const [roomError, setRoomError] =
     useState<string>("");
+
+  const [foundRoom, setFoundRoom] =
+    useState<StudyRoom | null>(null);
 
   /**
    * =========================================
@@ -72,7 +84,7 @@ export default function Rooms(): React.JSX.Element {
    */
 
   const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
+    event: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
 
     event.preventDefault();
@@ -101,6 +113,42 @@ export default function Rooms(): React.JSX.Element {
 
       setRoomName("");
     }
+  };
+
+  /**
+   * =========================================
+   * SEARCH ROOM
+   * =========================================
+   */
+
+  const handleSearchRoom = async (
+    event: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+
+    event.preventDefault();
+
+    clearError();
+
+    if (!searchRoomId.trim()) {
+
+      showSnackbar(
+        "Debes ingresar un ID de sala.",
+        "error"
+      );
+
+      return;
+    }
+
+    const room =
+      await searchRoomById(
+        searchRoomId.trim().toUpperCase()
+      );
+
+    if (!room) {
+      return;
+    }
+
+    setFoundRoom(room);
   };
 
   return (
@@ -246,6 +294,123 @@ export default function Rooms(): React.JSX.Element {
             </form>
 
           </section>
+
+          {/* SEARCH ROOM */}
+          <section
+            className="rooms-create"
+          >
+            <h2
+              className="rooms-create__title"
+            >
+              Buscar sala
+            </h2>
+
+            <form
+              onSubmit={handleSearchRoom}
+              className="rooms-create__form"
+            >
+
+              <div className="rooms-create__field">
+
+                <label
+                  className="rooms-create__label"
+                >
+                  ID de la sala
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Ej: A1B2C3"
+                  value={searchRoomId}
+                  onChange={(e) =>
+                    setSearchRoomId(
+                      e.target.value
+                    )
+                  }
+                  className="rooms-create__input"
+                />
+
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isSearchingRoom}
+                className="rooms-create__button"
+              >
+                {isSearchingRoom
+                  ? "Buscando..."
+                  : "Buscar sala"}
+              </Button>
+
+            </form>
+          </section>
+
+            {foundRoom && (
+
+              <section className="rooms-found">
+
+                <div className="rooms-found__icon">
+                  🚀
+                </div>
+
+                <div className="rooms-found__content">
+
+                  <span className="rooms-found__badge">
+                    Sala encontrada
+                  </span>
+
+                  <h3 className="rooms-found__title">
+                    {foundRoom.name}
+                  </h3>
+
+                  <p className="rooms-found__text">
+                    Creada por{" "}
+                    <strong>
+                      {foundRoom.ownerName}
+                    </strong>
+                  </p>
+
+                  <div className="rooms-found__meta">
+
+                    <span className="rooms-found__id">
+                      #{foundRoom.id}
+                    </span>
+
+                    <span className="rooms-found__status">
+                      En línea
+                    </span>
+
+                  </div>
+
+                </div>
+
+                <div className="rooms-found__actions">
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFoundRoom(null)
+                    }
+                    className="rooms-found__cancel"
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(`/room/${foundRoom.id}`)
+                    }
+                    className="rooms-found__enter"
+                  >
+                    Entrar
+                  </button>
+
+                </div>
+
+              </section>
+
+            )}
 
           {/* ROOMS */}
           <section
