@@ -14,6 +14,8 @@ import RoomCard from "../../components/RoomCard/RoomCard.tsx";
 import { useRoomStore } from "../../store/useRoomStore";
 import { useSnackbar } from "../../context/SnackbarContext";
 
+import { useNavigate } from "react-router-dom";
+
 import "./Rooms.css";
 
 export default function Rooms(): React.JSX.Element {
@@ -25,11 +27,17 @@ export default function Rooms(): React.JSX.Element {
     fetchMyRooms,
     createNewRoom,
     clearError,
+    searchRoomById,
   } = useRoomStore();
 
   const { showSnackbar } = useSnackbar();
 
+  const navigate = useNavigate();
+
   const [roomName, setRoomName] =
+    useState<string>("");
+
+  const [searchRoomId, setSearchRoomId] =
     useState<string>("");
 
   const [roomError, setRoomError] =
@@ -92,6 +100,47 @@ export default function Rooms(): React.JSX.Element {
 
       setRoomName("");
     }
+  };
+
+  /**
+   * =========================================
+   * SEARCH ROOM
+   * =========================================
+   */
+
+  const handleSearchRoom = async (
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+
+    event.preventDefault();
+
+    clearError();
+
+    if (!searchRoomId.trim()) {
+
+      showSnackbar(
+        "Debes ingresar un ID de sala.",
+        "error"
+      );
+
+      return;
+    }
+
+    const room =
+      await searchRoomById(
+        searchRoomId.trim().toUpperCase()
+      );
+
+    if (!room) {
+      return;
+    }
+
+    showSnackbar(
+      "Sala encontrada.",
+      "success"
+    );
+
+    navigate(`/rooms/${room.id}`);
   };
 
   return (
@@ -185,6 +234,56 @@ export default function Rooms(): React.JSX.Element {
 
             </form>
 
+          </section>
+
+          {/* SEARCH ROOM */}
+          <section
+            className="rooms-create"
+          >
+            <h2
+              className="rooms-create__title"
+            >
+              Buscar sala
+            </h2>
+
+            <form
+              onSubmit={handleSearchRoom}
+              className="rooms-create__form"
+            >
+
+              <div className="rooms-create__field">
+
+                <label
+                  className="rooms-create__label"
+                >
+                  ID de la sala
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Ej: A1B2C3"
+                  value={searchRoomId}
+                  onChange={(e) =>
+                    setSearchRoomId(
+                      e.target.value
+                    )
+                  }
+                  className="rooms-create__input"
+                />
+
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="rooms-create__button"
+              >
+                {loading
+                  ? "Buscando..."
+                  : "Buscar sala"}
+              </Button>
+
+            </form>
           </section>
 
           {/* ROOMS */}

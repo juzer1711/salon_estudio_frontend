@@ -3,6 +3,7 @@ import { create } from "zustand";
 import {
   createRoom,
   getMyRooms,
+  getRoomById,
   type StudyRoom,
 } from "../services/roomService";
 
@@ -23,6 +24,10 @@ interface RoomState {
   createNewRoom: (
     name: string
   ) => Promise<string | null>;
+
+  searchRoomById: (
+    roomId: string
+  ) => Promise<StudyRoom | null>;
 
   clearError: () => void;
 }
@@ -111,6 +116,45 @@ export const useRoomStore =
             error instanceof Error
               ? error.message
               : "Error al crear sala.",
+        });
+
+        return null;
+      }
+    },
+
+    /**
+     * =========================================
+     * SEARCH ROOM BY ID
+     * =========================================
+     */
+
+    searchRoomById: async (
+      roomId: string
+    ) => {
+      try {
+
+        set({
+          loading: true,
+          error: null,
+        });
+
+        const room =
+          await getRoomById(roomId);
+
+        set({
+          loading: false,
+        });
+
+        return room;
+
+      } catch (error) {
+
+        set({
+          loading: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Error al buscar sala.",
         });
 
         return null;
