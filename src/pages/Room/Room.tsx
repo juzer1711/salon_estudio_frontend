@@ -7,7 +7,10 @@ import {
   useState,
 } from "react";
 
-import { useParams } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 import AppLayout from "../../layouts/AppLayout";
 
@@ -19,12 +22,16 @@ from "../../services/socket";
 import { useAuthStore }
 from "../../store/useAuthStore";
 
+import { useRoomStore }
+from "../../store/useRoomStore";
+
 import "./Room.css";
 
 interface ChatMessage {
   roomId: string;
   message: string;
   user: string;
+  avatarUrl?: string;
   createdAt: string;
 }
 
@@ -33,8 +40,19 @@ export default function Room(): React.JSX.Element {
   const { roomId } =
     useParams<{ roomId: string }>();
 
+  const navigate =
+    useNavigate();
+
   const { profile } =
     useAuthStore();
+
+  const { rooms } =
+    useRoomStore();
+
+  const currentRoom =
+    rooms.find(
+      (room) => room.id === roomId
+    );
 
   const [message, setMessage] =
     useState<string>("");
@@ -51,89 +69,65 @@ export default function Room(): React.JSX.Element {
    * =========================================
    */
 
-useEffect(() => {
+  useEffect(() => {
 
-  if (!roomId) return;
+    if (!roomId) return;
 
-  /**
-   * CONNECT SOCKET
-   */
+    socket.connect();
 
-  socket.connect();
-
-  /**
-   * SOCKET CONNECTED
-   */
-
-  socket.on("connect", () => {
-
-    console.log(
-      "Socket conectado:",
-      socket.id
-    );
-
-    /**
-     * JOIN ROOM
-     */
-
-    socket.emit(
-      "join-room",
-      roomId
-    );
-
-    console.log(
-      "Joined room:",
-      roomId
-    );
-  });
-
-  /**
-   * RECEIVE MESSAGE
-   */
-
-  socket.on(
-    "receive-message",
-    (data: ChatMessage) => {
+    socket.on("connect", () => {
 
       console.log(
-        "Mensaje recibido:",
-        data
+        "Socket conectado:",
+        socket.id
       );
 
-      setMessages((prev) => [
-        ...prev,
-        data,
-      ]);
-    }
-  );
+      socket.emit(
+        "join-room",
+        roomId
+      );
 
-  /**
-   * DISCONNECT EVENT
-   */
+      console.log(
+        "Joined room:",
+        roomId
+      );
+    });
 
-  socket.on("disconnect", () => {
+    socket.on(
+      "receive-message",
+      (data: ChatMessage) => {
 
-    console.log(
-      "Socket desconectado"
+        console.log(
+          "Mensaje recibido:",
+          data
+        );
+
+        setMessages((prev) => [
+          ...prev,
+          data,
+        ]);
+      }
     );
-  });
 
-  /**
-   * CLEANUP
-   */
+    socket.on("disconnect", () => {
 
-  return () => {
+      console.log(
+        "Socket desconectado"
+      );
+    });
 
-    socket.off("connect");
+    return () => {
 
-    socket.off("receive-message");
+      socket.off("connect");
 
-    socket.off("disconnect");
+      socket.off("receive-message");
 
-    socket.disconnect();
-  };
+      socket.off("disconnect");
 
-}, [roomId]);
+      socket.disconnect();
+    };
+
+  }, [roomId]);
 
   /**
    * =========================================
@@ -176,6 +170,9 @@ useEffect(() => {
         user:
           profile?.username ??
           "Anónimo",
+
+        avatarUrl:
+          profile?.avatarUrl ?? "",
       }
     );
 
@@ -183,31 +180,46 @@ useEffect(() => {
   };
 
   return (
-    <>
-      <AppLayout>
+    <AppLayout>
 
       <main className="room">
-
 
         <section className="room__container">
 
           {/* HEADER */}
           <header className="room__header">
 
-            <div>
+            <div className="room__header-left">
 
-              <h1 className="room__title">
-                Sala colaborativa
-              </h1>
+              <button
+                type="button"
+                className="room__back"
+                onClick={() => navigate(-1)}
+              >
+                ← Volver
+              </button>
 
-              <p className="room__subtitle">
-                Comunicación en tiempo real
-                mediante WebSockets.
-              </p>
+              <div>
+
+                <div className="room__badge">
+                  Sala colaborativa
+                </div>
+
+                <h1 className="room__title">
+                  {currentRoom?.name ??
+                    "Cargando sala..."}
+                </h1>
+
+                <p className="room__subtitle">
+                  Comunicación en tiempo real
+                  mediante WebSockets.
+                </p>
+
+              </div>
 
             </div>
 
-            <div className="room__badge">
+            <div className="room__room-id">
               ID: {roomId}
             </div>
 
@@ -240,26 +252,55 @@ useEffect(() => {
 
                     <article
                       key={index}
-                      className="room-message"
+                      className={`room-message ${
+                        chat.user === profile?.username
+                          ? "room-message--own"
+                          : "room-message--other"
+                      }`}
                     >
 
-                      <div className="room-message__header">
+                      <div className="room-message__avatar">
 
-                        <span className="room-message__user">
-                          @{chat.user}
-                        </span>
+                        {chat.avatarUrl ? (
 
-                        <span className="room-message__time">
-                          {new Date(
-                            chat.createdAt
-                          ).toLocaleTimeString()}
-                        </span>
+                          <img
+                            src={chat.avatarUrl}
+                            alt={chat.user}
+                            className="room-message__avatar-image"
+                            referrerPolicy="no-referrer"
+                          />
+
+                        ) : (
+
+                          <span>
+                            {chat.user[0]?.toUpperCase()}
+                          </span>
+
+                        )}
 
                       </div>
 
-                      <p className="room-message__text">
-                        {chat.message}
-                      </p>
+                      <div className="room-message__content">
+
+                        <div className="room-message__header">
+
+                          <span className="room-message__user">
+                            @{chat.user}
+                          </span>
+
+                          <span className="room-message__time">
+                            {new Date(
+                              chat.createdAt
+                            ).toLocaleTimeString()}
+                          </span>
+
+                        </div>
+
+                        <p className="room-message__text">
+                          {chat.message}
+                        </p>
+
+                      </div>
 
                     </article>
                   )
@@ -297,7 +338,7 @@ useEffect(() => {
         </section>
 
       </main>
-      </AppLayout>
-    </>
+
+    </AppLayout>
   );
 }
