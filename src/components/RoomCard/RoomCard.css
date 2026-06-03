@@ -102,3 +102,131 @@
   transform: translateY(-2px);
   opacity: .95;
 }
+
+.room-card__content {
+  position: relative;
+}
+
+.room-card__header {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+}
+
+.room-card__menu-button {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  border: none;
+  border-radius: 10px;
+
+  background:
+    rgba(124,58,237,.12);
+
+  cursor: pointer;
+
+  color: inherit;
+
+  padding: 0;
+
+  transition:
+    background .2s ease;
+}
+
+.room-card__menu-button:hover {
+  background:
+    rgba(124,58,237,.25);
+}
+
+.room-card__menu {
+  position: absolute;
+
+  top: 42px;
+  right: 0;
+
+  overflow: hidden;
+
+  min-width: 170px;
+
+  padding: 8px;
+
+  border-radius: 14px;
+
+  background:
+    rgba(15,23,42,.98);
+
+  border:
+    1px solid rgba(124,58,237,.18);
+
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.35);
+
+  z-index: 50;
+}
+
+.room-card__menu-item {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: transparent;
+
+  text-align: left;
+
+  color: white;
+
+  cursor: pointer;
+
+  transition:
+    background .2s ease;
+}
+
+.room-card__menu-item:hover {
+  background:
+    rgba(124,58,237,.15);
+}
+
+.room-card__menu-item--danger:hover {
+  background:
+    rgba(239,68,68,.15);
+
+  color: #fca5a5;
+}
+
+.room-modal {
+  position: fixed;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0,0,0,.6);
+
+  z-index: 9999;
+}
+
+.room-modal__content {
+  width: 100%;
+  max-width: 420px;
+
+  padding: 24px;
+
+  border-radius: 20px;
+
+  background: #0f172a;
+
+  border: 1px solid rgba(124,58,237,.2);
+
+  color: white;
+}

@@ -7,18 +7,37 @@ import {
   useState
 } from "react";
 
+import EditRoomModal from "../../components/modals/EditRoomModal";
+import DeleteRoomModal from "../../components/modals/DeleteRoomModal";
+
 import {
   useNavigate,
   useParams,
 } from "react-router-dom";
 
+import type { StudyRoom } from "../../services/roomService";
+
 import AppLayout from "../../layouts/AppLayout";
 import Button from "../../components/ui/Button";
+<<<<<<< HEAD
 import { MessageSquareOff, Mic, MicOff, Video, VideoOff, LogOut, Users } from "lucide-react";
 import { useRoomSocket } from "../../hooks/useRoomSocket";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useRoomStore } from "../../store/useRoomStore";
 import { useSnackbar } from "../../context/SnackbarContext";
+=======
+
+import {
+  MessageSquareOff,
+  MoreVertical,
+} from "lucide-react";
+
+import { socket } from "../../services/socket";
+import { useAuthStore } from "../../store/useAuthStore";
+import { useRoomStore } from "../../store/useRoomStore";
+import { useSnackbar } from "../../context/SnackbarContext";
+
+>>>>>>> b5d7cade3f32ce546402c530d577f908b28afb1f
 import "./Room.css";
 
 export default function Room(): React.JSX.Element {
@@ -56,16 +75,60 @@ export default function Room(): React.JSX.Element {
     },
   });
 
+<<<<<<< HEAD
   const { searchRoomById } = useRoomStore();
+=======
+  const { showSnackbar } =
+    useSnackbar();
+
+  const {
+    searchRoomById,
+    editRoom,
+    removeRoom,
+  } = useRoomStore();
+>>>>>>> b5d7cade3f32ce546402c530d577f908b28afb1f
 
   const [message, setMessage] = useState<string>("");
   const [currentRoom, setCurrentRoom] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+<<<<<<< HEAD
   // =========================================
   // LOAD ROOM
   // =========================================
+=======
+  const [messages, setMessages] =
+    useState<ChatMessage[]>([]);
+
+  const [currentRoom, setCurrentRoom] =
+    useState<StudyRoom | null>(null);
+
+  const isOwner =
+    profile?.uid ===
+    currentRoom?.ownerUid;
+
+  const [showMenu, setShowMenu] =
+    useState(false);
+
+  const [editingRoom, setEditingRoom] =
+    useState<StudyRoom | null>(null);
+
+  const [deletingRoom, setDeletingRoom] =
+    useState<StudyRoom | null>(null);
+
+  const messagesEndRef =
+    useRef<HTMLDivElement | null>(null);
+
+  const menuRef =
+    useRef<HTMLDivElement>(null);
+
+  /**
+   * =========================================
+   * LOAD ROOM
+   * =========================================
+   */
+>>>>>>> b5d7cade3f32ce546402c530d577f908b28afb1f
 
   useEffect(() => {
     const loadRoom = async () => {
@@ -92,9 +155,59 @@ export default function Room(): React.JSX.Element {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+<<<<<<< HEAD
   // =========================================
   // SEND MESSAGE
   // =========================================
+=======
+  /**
+   * =========================================
+   * CLICK OUTSIDE
+   * =========================================
+   */
+  useEffect(() => {
+
+    const handleClickOutside = (
+      event: MouseEvent
+    ) => {
+
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(
+          event.target as Node
+        )
+      ) {
+        setShowMenu(false);
+      }
+
+    };
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+    return () => {
+
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+
+    };
+
+  }, []);
+
+  /**
+   * =========================================
+   * SEND MESSAGE
+   * =========================================
+   */
+
+  const handleSubmit = (
+    event: FormEvent<HTMLFormElement>
+  ): void => {
+>>>>>>> b5d7cade3f32ce546402c530d577f908b28afb1f
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -160,9 +273,66 @@ export default function Room(): React.JSX.Element {
               </div>
             </div>
 
+<<<<<<< HEAD
             <div className="room__room-id">
               <span className="room__room-id-label">ID de sala</span>
               <span className="room__room-id-value">{roomId}</span>
+=======
+            <div
+              className="room__actions"
+              ref={menuRef}
+            >
+
+              <div className="room__room-id">
+                ID: {roomId}
+              </div>
+
+              {isOwner && (
+
+                <button
+                  type="button"
+                  className="room__menu-button"
+                  onClick={() =>
+                    setShowMenu(!showMenu)
+                  }
+                >
+                  <MoreVertical size={18} />
+                </button>
+
+              )}
+
+              {showMenu && (
+
+                <div className="room__menu">
+
+                  <button
+                    className="room__menu-item"
+                    onClick={() => {
+                      setShowMenu(false);
+                      setEditingRoom(currentRoom);
+                    }}
+                  >
+                    Editar sala
+                  </button>
+
+                  <button
+                    className="
+                      room__menu-item
+                      room__menu-item--danger
+                    "
+                    onClick={() => {
+                      setShowMenu(false);
+                      setDeletingRoom(currentRoom);
+                    }}
+                  >
+                    Eliminar sala
+                  </button>
+
+                </div>
+
+              )}
+
+>>>>>>> b5d7cade3f32ce546402c530d577f908b28afb1f
             </div>
           </header>
 
@@ -346,6 +516,76 @@ export default function Room(): React.JSX.Element {
           </section>
         </section>
       </main>
+<<<<<<< HEAD
+=======
+
+      {editingRoom && (
+
+        <EditRoomModal
+          currentName={editingRoom.name}
+          onClose={() =>
+            setEditingRoom(null)
+          }
+          onSave={async (newName) => {
+
+            const success =
+              await editRoom(
+                editingRoom.id,
+                newName
+              );
+
+            if (success) {
+
+              setCurrentRoom((prev: any) => ({
+                ...prev,
+                name: newName,
+              }));
+
+              showSnackbar(
+                "Sala actualizada correctamente.",
+                "success"
+              );
+
+              setEditingRoom(null);
+
+            }
+
+          }}
+        />
+
+      )}
+
+      {deletingRoom && (
+
+        <DeleteRoomModal
+          roomName={deletingRoom.name}
+          onClose={() =>
+            setDeletingRoom(null)
+          }
+          onConfirm={async () => {
+
+            const success =
+              await removeRoom(
+                deletingRoom.id
+              );
+
+            if (success) {
+
+              showSnackbar(
+                "Sala eliminada correctamente.",
+                "success"
+              );
+
+              setDeletingRoom(null);
+
+            }
+
+          }}
+        />
+
+      )}
+
+>>>>>>> b5d7cade3f32ce546402c530d577f908b28afb1f
     </AppLayout>
   );
 }
