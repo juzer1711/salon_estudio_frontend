@@ -17,7 +17,6 @@ import Dashboard from "../../pages/Dashboard/Dashboard.tsx";
 import Rooms from "../../pages/Rooms/Rooms.tsx";
 import Profile from "../../pages/Profile/Profile.tsx";
 import Room from "../../pages/Room/Room.tsx";
-import CreateRoom from "../../pages/CreateRoom.tsx";
 import MyRooms from "../../pages/MyRooms/MyRooms.tsx";
 
 import ChooseUsername from "../../pages/ChooseUsername/ChooseUsername";
@@ -119,10 +118,6 @@ export const router = createBrowserRouter([
       {
         path: "/room/:roomId",
         element: <Room />,
-      },
-      {
-        path: "/create_room",
-        element: <CreateRoom />,
       },
       {
         path: "/my_rooms",

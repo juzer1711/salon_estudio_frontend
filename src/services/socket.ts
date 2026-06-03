@@ -3,15 +3,65 @@ import { io, Socket } from "socket.io-client";
 import { SOCKET_URL }
 from "../config/env";
 
-/**
- * =========================================
- * SOCKET CLIENT
- * =========================================
- */
-
 export const socket: Socket = io(
   SOCKET_URL,
   {
     autoConnect: false,
   }
 );
+
+/**
+ * ROOM EVENTS
+ */
+
+export const joinRoom = (
+  data: {
+    roomId: string;
+    uid: string;
+    username: string;
+    avatarUrl?: string;
+  }
+): void => {
+
+  socket.emit(
+    "join-room",
+    data
+  );
+};
+
+export const leaveRoom = (): void => {
+
+  socket.emit(
+    "leave-room"
+  );
+};
+
+/**
+ * CHAT
+ */
+
+export const sendMessage = (
+  data: {
+    roomId: string;
+    userUid: string;
+    username: string;
+    avatarUrl?: string;
+    message: string;
+  }
+): void => {
+
+  socket.emit(
+    "send-message",
+    data
+  );
+};
+
+export const getChatHistory = (
+  roomId: string
+): void => {
+
+  socket.emit(
+    "get-chat-history",
+    roomId
+  );
+};

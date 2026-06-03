@@ -4,7 +4,7 @@ import {
   type FormEvent,
   useEffect,
   useRef,
-  useState,
+  useState
 } from "react";
 
 import {
@@ -13,77 +13,68 @@ import {
 } from "react-router-dom";
 
 import AppLayout from "../../layouts/AppLayout";
-
 import Button from "../../components/ui/Button";
-
-import { MessageSquareOff } from "lucide-react";
-
-import { socket }
-from "../../services/socket";
-
-import { useAuthStore }
-from "../../store/useAuthStore";
-
-import { useRoomStore }
-from "../../store/useRoomStore";
-
+import { MessageSquareOff, Mic, MicOff, Video, VideoOff, LogOut, Users } from "lucide-react";
+import { useRoomSocket } from "../../hooks/useRoomSocket";
+import { useAuthStore } from "../../store/useAuthStore";
+import { useRoomStore } from "../../store/useRoomStore";
+import { useSnackbar } from "../../context/SnackbarContext";
 import "./Room.css";
-
-interface ChatMessage {
-  roomId: string;
-  message: string;
-  user: string;
-  avatarUrl?: string;
-  createdAt: string;
-}
 
 export default function Room(): React.JSX.Element {
 
-  const { roomId } =
-    useParams<{ roomId: string }>();
+  const { roomId } = useParams<{ roomId: string }>();
+  const navigate = useNavigate();
+  const { profile } = useAuthStore();
+  const { showSnackbar } = useSnackbar();
 
-  const navigate =
-    useNavigate();
+  if (!roomId || !profile) {
+    return (
+      <AppLayout>
+        <main className="room">
+          <p>Cargando sala...</p>
+        </main>
+      </AppLayout>
+    );
+  }
 
-  const { profile } =
-    useAuthStore();
+  const {
+    messages,
+    participants,
+    isConnected,
+    sendChatMessage,
+  } = useRoomSocket({
+    roomId,
+    uid: profile.uid,
+    username: profile.username,
+    avatarUrl: profile.avatarUrl,
+    onParticipantJoined: (username) => {
+      showSnackbar(`${username} se unió a la sala 👋`, "success");
+    },
+    onParticipantLeft: (username) => {
+      showSnackbar(`${username} abandonó la sala`, "error");
+    },
+  });
 
-  const { searchRoomById } =
-    useRoomStore();
+  const { searchRoomById } = useRoomStore();
 
-  const [message, setMessage] =
-    useState<string>("");
+  const [message, setMessage] = useState<string>("");
+  const [currentRoom, setCurrentRoom] = useState<any>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const [messages, setMessages] =
-    useState<ChatMessage[]>([]);
-
-  const [currentRoom, setCurrentRoom] =
-    useState<any>(null);
-
-  const messagesEndRef =
-    useRef<HTMLDivElement | null>(null);
-
-  /**
-   * =========================================
-   * LOAD ROOM
-   * =========================================
-   */
+  // =========================================
+  // LOAD ROOM
+  // =========================================
 
   useEffect(() => {
-
     const loadRoom = async () => {
+      if (!roomId) return;
 
-      if (!roomId) {
-        return;
-      }
-
-      const room =
-        await searchRoomById(roomId);
+      const room = await searchRoomById(roomId);
 
       if (!room) {
-
         navigate("/rooms");
-
         return;
       }
 
@@ -91,289 +82,270 @@ export default function Room(): React.JSX.Element {
     };
 
     loadRoom();
+  }, [roomId, searchRoomById, navigate]);
 
-  }, [
-    roomId,
-    searchRoomById,
-    navigate,
-  ]);
-
-  /**
-   * =========================================
-   * SOCKET CONNECTION
-   * =========================================
-   */
+  // =========================================
+  // AUTO SCROLL
+  // =========================================
 
   useEffect(() => {
-
-    if (!roomId) return;
-
-    socket.connect();
-
-    socket.on("connect", () => {
-
-      console.log(
-        "Socket conectado:",
-        socket.id
-      );
-
-      socket.emit(
-        "join-room",
-        roomId
-      );
-
-      console.log(
-        "Joined room:",
-        roomId
-      );
-    });
-
-    socket.on(
-      "receive-message",
-      (data: ChatMessage) => {
-
-        console.log(
-          "Mensaje recibido:",
-          data
-        );
-
-        setMessages((prev) => [
-          ...prev,
-          data,
-        ]);
-      }
-    );
-
-    socket.on("disconnect", () => {
-
-      console.log(
-        "Socket desconectado"
-      );
-    });
-
-    return () => {
-
-      socket.off("connect");
-
-      socket.off("receive-message");
-
-      socket.off("disconnect");
-
-      socket.disconnect();
-    };
-
-  }, [roomId]);
-
-  /**
-   * =========================================
-   * AUTO SCROLL
-   * =========================================
-   */
-
-  useEffect(() => {
-
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  /**
-   * =========================================
-   * SEND MESSAGE
-   * =========================================
-   */
+  // =========================================
+  // SEND MESSAGE
+  // =========================================
 
-  const handleSubmit = (
-    event: FormEvent<HTMLFormElement>
-  ): void => {
-
+  const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
 
-    if (
-      !message.trim() ||
-      !roomId
-    ) {
-      return;
-    }
+    if (!message.trim()) return;
 
-    socket.emit(
-      "send-message",
-      {
-        roomId,
-        message,
-        user:
-          profile?.username ??
-          "Anónimo",
-
-        avatarUrl:
-          profile?.avatarUrl ?? "",
-      }
-    );
-
+    sendChatMessage(message);
     setMessage("");
+    inputRef.current?.focus();
   };
+
+  const handleLeaveRoom = (): void => {
+    navigate("/rooms");
+  };
+
+  // =========================================
+  // HELPERS
+  // =========================================
+
+  const formatTime = (dateStr: string): string => {
+    return new Date(dateStr).toLocaleTimeString("es-CO", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getInitial = (name: string): string =>
+    name?.[0]?.toUpperCase() ?? "?";
 
   return (
     <AppLayout>
-
       <main className="room">
-
         <section className="room__container">
 
           {/* HEADER */}
           <header className="room__header">
-
             <div className="room__header-left">
-
               <button
                 type="button"
                 className="room__back"
-                onClick={() => navigate(-1)}
+                onClick={handleLeaveRoom}
+                aria-label="Salir de la sesión"
               >
-                ← Volver
+                <LogOut size={16} />
+                Salir
               </button>
 
               <div>
-
-                <div className="room__badge">
-                  Sala colaborativa
-                </div>
+                <div className="room__badge">Sala colaborativa</div>
 
                 <h1 className="room__title">
-                  {currentRoom?.name ??
-                    "Cargando sala..."}
+                  {currentRoom?.name ?? "Cargando sala..."}
                 </h1>
 
                 <p className="room__subtitle">
-                  Comunicación en tiempo real
-                  mediante WebSockets.
+                  Comunicación en tiempo real mediante WebSockets.
                 </p>
 
+                <div className="room__connection" aria-live="polite">
+                  <span className={`room__connection-dot ${isConnected ? "room__connection-dot--on" : "room__connection-dot--off"}`} />
+                  {isConnected ? "Conectado" : "Desconectado"}
+                </div>
               </div>
-
             </div>
 
             <div className="room__room-id">
-              ID: {roomId}
+              <span className="room__room-id-label">ID de sala</span>
+              <span className="room__room-id-value">{roomId}</span>
             </div>
-
           </header>
 
-          {/* CHAT */}
-          <section className="room-chat">
+          {/* CONTENT */}
+          <section className="room-content">
 
-            <div className="room-chat__messages">
+            {/* SIDEBAR — PARTICIPANTS */}
+            <aside className="room-sidebar" aria-labelledby="participants-title">
 
-              {messages.length === 0 ? (
-
-                <div className="room-chat__empty">
-
-                  <span>
-                    <MessageSquareOff size={48} color="#a78bfa" />
-                  </span>
-
-                  <p>
-                    Aún no hay mensajes
-                    en esta sala.
-                  </p>
-
+              <div className="room-sidebar__header">
+                <div className="room-sidebar__header-left">
+                  <Users size={16} />
+                  <h2 id="participants-title">Participantes</h2>
                 </div>
+                <span className="room-sidebar__count">
+                  {participants.length}
+                </span>
+              </div>
 
-              ) : (
+              <div className="room-sidebar__list" role="list">
+                {participants.length === 0 ? (
+                  <p className="room-sidebar__empty">
+                    Aún no hay participantes.
+                  </p>
+                ) : (
+                  participants.map((participant) => {
 
-                messages.map(
-                  (chat, index) => (
+                    // Mock AV states — placeholders hasta Sprint 5
+                    const isMuted = false;
+                    const isCameraOff = false;
+                    const isMe = participant.uid === profile.uid;
 
-                    <article
-                      key={index}
-                      className={`room-message ${
-                        chat.user === profile?.username
-                          ? "room-message--own"
-                          : "room-message--other"
-                      }`}
-                    >
-
-                      <div className="room-message__avatar">
-
-                        {chat.avatarUrl ? (
-
-                          <img
-                            src={chat.avatarUrl}
-                            alt={chat.user}
-                            className="room-message__avatar-image"
-                            referrerPolicy="no-referrer"
+                    return (
+                      <article
+                        key={participant.socketId}
+                        className={`room-sidebar__participant ${isMe ? "room-sidebar__participant--me" : ""}`}
+                        role="listitem"
+                        aria-label={`${participant.username}${isMe ? ", tú" : ""}`}
+                      >
+                        <div className="room-sidebar__avatar-wrap">
+                          <div className="room-sidebar__avatar">
+                            {participant.avatarUrl ? (
+                              <img
+                                src={participant.avatarUrl}
+                                alt={participant.username}
+                                className="room-sidebar__avatar-img"
+                                referrerPolicy="no-referrer"
+                              />
+                            ) : (
+                              <span>{getInitial(participant.username)}</span>
+                            )}
+                          </div>
+                          <span
+                            className="room-sidebar__online-dot"
+                            aria-hidden="true"
                           />
-
-                        ) : (
-
-                          <span>
-                            {chat.user[0]?.toUpperCase()}
-                          </span>
-
-                        )}
-
-                      </div>
-
-                      <div className="room-message__content">
-
-                        <div className="room-message__header">
-
-                          <span className="room-message__user">
-                            @{chat.user}
-                          </span>
-
-                          <span className="room-message__time">
-                            {new Date(
-                              chat.createdAt
-                            ).toLocaleTimeString()}
-                          </span>
-
                         </div>
 
-                        <p className="room-message__text">
-                          {chat.message}
-                        </p>
+                        <div className="room-sidebar__info">
+                          <p className="room-sidebar__name">
+                            @{participant.username}
+                            {isMe && <span className="room-sidebar__you-tag">tú</span>}
+                          </p>
+                          <small className="room-sidebar__status">Conectado</small>
+                        </div>
 
-                      </div>
+                        {/* Mock AV icons */}
+                        <div
+                          className="room-sidebar__av"
+                          aria-label={`${isMuted ? "Micrófono silenciado" : "Micrófono activo"}, ${isCameraOff ? "Cámara apagada" : "Cámara activa"}`}
+                        >
+                          {isMuted
+                            ? <MicOff size={14} className="room-sidebar__av-icon room-sidebar__av-icon--off" aria-hidden="true" />
+                            : <Mic size={14} className="room-sidebar__av-icon room-sidebar__av-icon--on" aria-hidden="true" />
+                          }
+                          {isCameraOff
+                            ? <VideoOff size={14} className="room-sidebar__av-icon room-sidebar__av-icon--off" aria-hidden="true" />
+                            : <Video size={14} className="room-sidebar__av-icon room-sidebar__av-icon--on" aria-hidden="true" />
+                          }
+                        </div>
+                      </article>
+                    );
+                  })
+                )}
+              </div>
+            </aside>
 
-                    </article>
-                  )
-                )
-              )}
-
-              <div ref={messagesEndRef} />
-
-            </div>
-
-            {/* INPUT */}
-            <form
-              onSubmit={handleSubmit}
-              className="room-chat__form"
+            {/* CHAT */}
+            <section
+              className="room-chat"
+              aria-label="Chat de la sala"
             >
+              <div className="room-chat__messages" role="log" aria-live="polite" aria-label="Mensajes del chat">
 
-              <input
-                type="text"
-                placeholder="Escribe un mensaje..."
-                value={message}
-                onChange={(e) =>
-                  setMessage(e.target.value)
-                }
-                className="room-chat__input"
-              />
+                {messages.length === 0 ? (
+                  <div className="room-chat__empty">
+                    <MessageSquareOff size={48} strokeWidth={1.5} />
+                    <p>Aún no hay mensajes en esta sala.</p>
+                    <small>¡Sé el primero en escribir algo!</small>
+                  </div>
+                ) : (
+                  messages.map((chat, index) => {
 
-              <Button type="submit">
-                Enviar
-              </Button>
+                    const isOwn = chat.username === profile?.username;
+                    const prevMessage = messages[index - 1];
+                    const isConsecutive =
+                      prevMessage?.username === chat.username;
 
-            </form>
+                    return (
+                      <article
+                        key={`${chat.userUid}-${chat.createdAt}-${index}`}
+                        className={`room-message ${isOwn ? "room-message--own" : "room-message--other"} ${isConsecutive ? "room-message--consecutive" : ""}`}
+                        aria-label={`Mensaje de ${chat.username}`}
+                      >
+                        {/* Avatar — oculto en mensajes consecutivos */}
+                        <div
+                          className={`room-message__avatar ${isConsecutive ? "room-message__avatar--hidden" : ""}`}
+                          aria-hidden="true"
+                        >
+                          {!isConsecutive && (
+                            chat.avatarUrl ? (
+                              <img
+                                src={chat.avatarUrl}
+                                alt={chat.username}
+                                className="room-message__avatar-image"
+                                referrerPolicy="no-referrer"
+                              />
+                            ) : (
+                              <span>{getInitial(chat.username)}</span>
+                            )
+                          )}
+                        </div>
+
+                        <div className="room-message__content">
+                          {!isConsecutive && (
+                            <div className="room-message__header">
+                              <span className="room-message__user">
+                                @{chat.username}
+                              </span>
+                              <span className="room-message__time">
+                                {formatTime(chat.createdAt)}
+                              </span>
+                            </div>
+                          )}
+                          <p className="room-message__text">{chat.message}</p>
+                          {isConsecutive && (
+                            <span className="room-message__time room-message__time--inline">
+                              {formatTime(chat.createdAt)}
+                            </span>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* INPUT */}
+              <form onSubmit={handleSubmit} className="room-chat__form">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="Escribe un mensaje..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="room-chat__input"
+                  aria-label="Campo de mensaje"
+                  maxLength={500}
+                />
+                <Button
+                  type="submit"
+                  disabled={!message.trim()}
+                  aria-label="Enviar mensaje"
+                >
+                  Enviar
+                </Button>
+              </form>
+            </section>
 
           </section>
-
         </section>
-
       </main>
-
     </AppLayout>
   );
 }
