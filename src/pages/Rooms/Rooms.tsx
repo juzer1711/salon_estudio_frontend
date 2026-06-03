@@ -9,10 +9,14 @@ import AppLayout from "../../layouts/AppLayout.tsx";
 
 import Button from "../../components/ui/Button";
 import RoomCard from "../../components/RoomCard/RoomCard.tsx";
+import EditRoomModal from "../../components/modals/EditRoomModal";
+import DeleteRoomModal from "../../components/modals/DeleteRoomModal";
 
 import { useRoomStore } from "../../store/useRoomStore";
+
 import type { StudyRoom }
   from "../../services/roomService";
+  
 import { useSnackbar } from "../../context/SnackbarContext";
 
 import { useNavigate } from "react-router-dom";
@@ -34,6 +38,8 @@ export default function Rooms(): React.JSX.Element {
     createNewRoom,
     clearError,
     searchRoomById,
+    editRoom,
+    removeRoom,
   } = useRoomStore();
 
   const { showSnackbar } =
@@ -51,6 +57,12 @@ export default function Rooms(): React.JSX.Element {
     useState<string>("");
 
   const [foundRoom, setFoundRoom] =
+    useState<StudyRoom | null>(null);
+
+  const [editingRoom, setEditingRoom] =
+    useState<StudyRoom | null>(null);
+
+  const [deletingRoom, setDeletingRoom] =
     useState<StudyRoom | null>(null);
 
   /**
@@ -503,6 +515,8 @@ export default function Rooms(): React.JSX.Element {
                   <RoomCard
                     key={room.id}
                     room={room}
+                    onEdit={setEditingRoom}
+                    onDelete={setDeletingRoom}
                   />
 
                 ))}
@@ -516,6 +530,67 @@ export default function Rooms(): React.JSX.Element {
         </section>
 
       </main>
+
+      {editingRoom && (
+
+        <EditRoomModal
+          currentName={editingRoom.name}
+          onClose={() =>
+            setEditingRoom(null)
+          }
+          onSave={async (newName) => {
+
+            const success =
+              await editRoom(
+                editingRoom.id,
+                newName
+              );
+
+            if (success) {
+
+              showSnackbar(
+                "Sala actualizada correctamente.",
+                "success"
+              );
+
+              setEditingRoom(null);
+
+            }
+
+          }}
+        />
+
+      )}
+
+      {deletingRoom && (
+
+        <DeleteRoomModal
+          roomName={deletingRoom.name}
+          onClose={() =>
+            setDeletingRoom(null)
+          }
+          onConfirm={async () => {
+
+            const success =
+              await removeRoom(
+                deletingRoom.id
+              );
+
+            if (success) {
+
+              showSnackbar(
+                "Sala eliminada correctamente.",
+                "success"
+              );
+
+              setDeletingRoom(null);
+
+            }
+
+          }}
+        />
+
+      )}
 
     </AppLayout>
   );

@@ -4,6 +4,8 @@ import {
   createRoom,
   getMyRooms,
   getRoomById,
+  updateRoom,
+  deleteRoom,
   type StudyRoom,
 } from "../services/roomService";
 
@@ -30,6 +32,15 @@ interface RoomState {
   searchRoomById: (
     roomId: string
   ) => Promise<StudyRoom | null>;
+
+  editRoom: (
+    roomId: string,
+    name: string
+  ) => Promise<boolean>;
+
+  removeRoom: (
+    roomId: string
+  ) => Promise<boolean>;
 
   clearError: () => void;
 }
@@ -162,6 +173,89 @@ export const useRoomStore =
         });
 
         return null;
+      }
+    },
+
+    /**
+     * =========================================
+     * EDIT ROOM
+     * =========================================
+     */
+
+    editRoom: async (
+      roomId,
+      name
+    ) => {
+
+      try {
+
+        set({
+          error: null,
+        });
+
+        await updateRoom(
+          roomId,
+          name
+        );
+
+        const rooms =
+          await getMyRooms();
+
+        set({
+          rooms,
+        });
+
+        return true;
+
+      } catch (error) {
+
+        set({
+          error:
+            error instanceof Error
+              ? error.message
+              : "Error al editar sala.",
+        });
+
+        return false;
+      }
+    },
+
+    /**
+     * =========================================
+     * DELETE ROOM
+     * =========================================
+     */
+
+    removeRoom: async (
+      roomId
+    ) => {
+
+      try {
+
+        set({
+          error: null,
+        });
+
+        await deleteRoom(roomId);
+
+        set((state) => ({
+          rooms: state.rooms.filter(
+            (room) => room.id !== roomId
+          ),
+        }));
+
+        return true;
+
+      } catch (error) {
+
+        set({
+          error:
+            error instanceof Error
+              ? error.message
+              : "Error al eliminar sala.",
+        });
+
+        return false;
       }
     },
 
