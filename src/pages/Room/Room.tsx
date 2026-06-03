@@ -7,25 +7,29 @@ import {
   useState,
 } from "react";
 
+import EditRoomModal from "../../components/modals/EditRoomModal";
+import DeleteRoomModal from "../../components/modals/DeleteRoomModal";
+
 import {
   useNavigate,
   useParams,
 } from "react-router-dom";
 
+import type { StudyRoom } from "../../services/roomService";
+
 import AppLayout from "../../layouts/AppLayout";
 
 import Button from "../../components/ui/Button";
 
-import { MessageSquareOff } from "lucide-react";
+import {
+  MessageSquareOff,
+  MoreVertical,
+} from "lucide-react";
 
-import { socket }
-from "../../services/socket";
-
-import { useAuthStore }
-from "../../store/useAuthStore";
-
-import { useRoomStore }
-from "../../store/useRoomStore";
+import { socket } from "../../services/socket";
+import { useAuthStore } from "../../store/useAuthStore";
+import { useRoomStore } from "../../store/useRoomStore";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 import "./Room.css";
 
@@ -48,8 +52,14 @@ export default function Room(): React.JSX.Element {
   const { profile } =
     useAuthStore();
 
-  const { searchRoomById } =
-    useRoomStore();
+  const { showSnackbar } =
+    useSnackbar();
+
+  const {
+    searchRoomById,
+    editRoom,
+    removeRoom,
+  } = useRoomStore();
 
   const [message, setMessage] =
     useState<string>("");
@@ -58,10 +68,26 @@ export default function Room(): React.JSX.Element {
     useState<ChatMessage[]>([]);
 
   const [currentRoom, setCurrentRoom] =
-    useState<any>(null);
+    useState<StudyRoom | null>(null);
+
+  const isOwner =
+    profile?.uid ===
+    currentRoom?.ownerUid;
+
+  const [showMenu, setShowMenu] =
+    useState(false);
+
+  const [editingRoom, setEditingRoom] =
+    useState<StudyRoom | null>(null);
+
+  const [deletingRoom, setDeletingRoom] =
+    useState<StudyRoom | null>(null);
 
   const messagesEndRef =
     useRef<HTMLDivElement | null>(null);
+
+  const menuRef =
+    useRef<HTMLDivElement>(null);
 
   /**
    * =========================================
@@ -180,6 +206,44 @@ export default function Room(): React.JSX.Element {
 
   /**
    * =========================================
+   * CLICK OUTSIDE
+   * =========================================
+   */
+  useEffect(() => {
+
+    const handleClickOutside = (
+      event: MouseEvent
+    ) => {
+
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(
+          event.target as Node
+        )
+      ) {
+        setShowMenu(false);
+      }
+
+    };
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+    return () => {
+
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+
+    };
+
+  }, []);
+
+  /**
+   * =========================================
    * SEND MESSAGE
    * =========================================
    */
@@ -254,8 +318,60 @@ export default function Room(): React.JSX.Element {
 
             </div>
 
-            <div className="room__room-id">
-              ID: {roomId}
+            <div
+              className="room__actions"
+              ref={menuRef}
+            >
+
+              <div className="room__room-id">
+                ID: {roomId}
+              </div>
+
+              {isOwner && (
+
+                <button
+                  type="button"
+                  className="room__menu-button"
+                  onClick={() =>
+                    setShowMenu(!showMenu)
+                  }
+                >
+                  <MoreVertical size={18} />
+                </button>
+
+              )}
+
+              {showMenu && (
+
+                <div className="room__menu">
+
+                  <button
+                    className="room__menu-item"
+                    onClick={() => {
+                      setShowMenu(false);
+                      setEditingRoom(currentRoom);
+                    }}
+                  >
+                    Editar sala
+                  </button>
+
+                  <button
+                    className="
+                      room__menu-item
+                      room__menu-item--danger
+                    "
+                    onClick={() => {
+                      setShowMenu(false);
+                      setDeletingRoom(currentRoom);
+                    }}
+                  >
+                    Eliminar sala
+                  </button>
+
+                </div>
+
+              )}
+
             </div>
 
           </header>
@@ -373,6 +489,72 @@ export default function Room(): React.JSX.Element {
         </section>
 
       </main>
+
+      {editingRoom && (
+
+        <EditRoomModal
+          currentName={editingRoom.name}
+          onClose={() =>
+            setEditingRoom(null)
+          }
+          onSave={async (newName) => {
+
+            const success =
+              await editRoom(
+                editingRoom.id,
+                newName
+              );
+
+            if (success) {
+
+              setCurrentRoom((prev: any) => ({
+                ...prev,
+                name: newName,
+              }));
+
+              showSnackbar(
+                "Sala actualizada correctamente.",
+                "success"
+              );
+
+              setEditingRoom(null);
+
+            }
+
+          }}
+        />
+
+      )}
+
+      {deletingRoom && (
+
+        <DeleteRoomModal
+          roomName={deletingRoom.name}
+          onClose={() =>
+            setDeletingRoom(null)
+          }
+          onConfirm={async () => {
+
+            const success =
+              await removeRoom(
+                deletingRoom.id
+              );
+
+            if (success) {
+
+              showSnackbar(
+                "Sala eliminada correctamente.",
+                "success"
+              );
+
+              setDeletingRoom(null);
+
+            }
+
+          }}
+        />
+
+      )}
 
     </AppLayout>
   );

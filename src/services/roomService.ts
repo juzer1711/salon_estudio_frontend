@@ -166,3 +166,69 @@ export const getRoomById = async (
 
   return data.room;
 };
+
+/**
+ * =========================================
+ * UPDATE ROOM
+ * PATCH /api/v1/rooms/:roomId
+ * =========================================
+ */
+
+export const updateRoom = async (
+  roomId: string,
+  name: string
+): Promise<void> => {
+
+  const response = await fetch(
+    `${API_URL}/rooms/${roomId}`,
+    {
+      method: "PATCH",
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({
+        name,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+
+    const message =
+      await extractBackendError(
+        response,
+        "No fue posible actualizar la sala."
+      );
+
+    throw new Error(message);
+  }
+};
+
+/**
+ * =========================================
+ * DELETE ROOM
+ * DELETE /api/v1/rooms/:roomId
+ * =========================================
+ */
+
+export const deleteRoom = async (
+  roomId: string
+): Promise<void> => {
+
+  const response = await fetch(
+    `${API_URL}/rooms/${roomId}`,
+    {
+      method: "DELETE",
+      headers: await getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+
+    const message =
+      await extractBackendError(
+        response,
+        "No fue posible eliminar la sala."
+      );
+
+    throw new Error(message);
+  }
+};
