@@ -194,11 +194,6 @@ export default function Rooms(): React.JSX.Element {
       return;
     }
 
-    showSnackbar(
-      "Te has unido a la sala.",
-      "success"
-    );
-
     await fetchJoinedRooms();
 
   showSnackbar(
@@ -212,6 +207,19 @@ export default function Rooms(): React.JSX.Element {
 
     setFoundRoom(null);
   };
+
+  const isOwnerRoom =
+  rooms.some(
+    (room) => room.id === foundRoom?.id
+  );
+
+const isJoinedRoom =
+  joinedRooms.some(
+    (room) => room.id === foundRoom?.id
+  );
+
+const canEnter =
+  isOwnerRoom || isJoinedRoom;
 
   return (
     <AppLayout>
@@ -460,14 +468,25 @@ export default function Rooms(): React.JSX.Element {
 
                   <button
                     type="button"
-                    onClick={handleJoinRoom}
+                    onClick={() =>
+                      navigate(`/room/${foundRoom.id}`)
+                    }
                     className="rooms-found__enter"
                   >
-                    Unirme
+                    Entrar
                   </button>
 
-                </div>
+                  {!canEnter && (
+                    <button
+                      type="button"
+                      onClick={handleJoinRoom}
+                      className="rooms-found__enter"
+                    >
+                      Unirme
+                    </button>
+                  )}
 
+                </div>
               </section>
 
             )}
