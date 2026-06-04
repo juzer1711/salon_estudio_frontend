@@ -232,3 +232,99 @@ export const deleteRoom = async (
     throw new Error(message);
   }
 };
+
+/**
+ * =========================================
+ * JOIN ROOM
+ * POST /api/v1/rooms/:roomId/join
+ * =========================================
+ */
+
+export const joinRoom = async (
+  roomId: string
+): Promise<void> => {
+
+  const response = await fetch(
+    `${API_URL}/rooms/${roomId}/join`,
+    {
+      method: "POST",
+      headers: await getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+
+    const message =
+      await extractBackendError(
+        response,
+        "No fue posible unirse a la sala."
+      );
+
+    throw new Error(message);
+  }
+};
+
+/**
+ * =========================================
+ * LEAVE ROOM
+ * DELETE /api/v1/rooms/:roomId/leave
+ * =========================================
+ */
+
+export const leaveRoom = async (
+  roomId: string
+): Promise<void> => {
+
+  const response = await fetch(
+    `${API_URL}/rooms/${roomId}/leave`,
+    {
+      method: "DELETE",
+      headers: await getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+
+    const message =
+      await extractBackendError(
+        response,
+        "No fue posible abandonar la sala."
+      );
+
+    throw new Error(message);
+  }
+};
+
+/**
+ * =========================================
+ * GET JOINED ROOMS
+ * GET /api/v1/rooms/joined
+ * =========================================
+ */
+
+export const getJoinedRooms = async (): Promise<StudyRoom[]> => {
+
+  const response = await fetch(
+    `${API_URL}/rooms/joined`,
+    {
+      method: "GET",
+      headers: await getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+
+    const message =
+      await extractBackendError(
+        response,
+        "No fue posible obtener las salas."
+      );
+
+    throw new Error(message);
+  }
+
+  const data =
+    await response.json();
+
+  return data.rooms;
+};

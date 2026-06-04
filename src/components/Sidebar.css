@@ -29,6 +29,8 @@
   z-index: 90;
 }
 
+
+
 /**
  * OPEN
  */
@@ -201,6 +203,15 @@
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+}
+
+.sidebar__section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9ca3af;
+  margin: 1rem 0 0.5rem;
 }
 
 .sidebar__room-link {

@@ -23,14 +23,22 @@ export default function Sidebar({
   const { profile } =
     useAuthStore();
 
-  const { rooms } =
-    useRoomStore();
+  const {
+    rooms,
+    joinedRooms,
+  } = useRoomStore();
 
   const initials =
     profile?.firstName &&
     profile?.lastName
       ? `${profile.firstName[0]}${profile.lastName[0]}`
       : "RM";
+  
+  const recentOwnedRooms =
+  rooms.slice(0, 3);
+
+  const recentJoinedRooms =
+    joinedRooms.slice(0, 3);
 
   return (
     <aside
@@ -142,7 +150,10 @@ export default function Sidebar({
           </h3>
 
           <span className="sidebar__rooms-count">
-            {rooms.length}
+            {
+              rooms.length +
+              joinedRooms.length
+            }
           </span>
 
         </div>
@@ -157,32 +168,89 @@ export default function Sidebar({
 
           <div className="sidebar__rooms-list">
 
-            {rooms.slice(0, 5).map((room) => (
+          {recentOwnedRooms.length > 0 && (
 
-              <NavLink
-                key={room.id}
-                to={`/room/${room.id}`}
-                onClick={onClose}
-                className="sidebar__room-link"
-              >
-                <span>
-                  <BookOpen size={20} color="#a78bfa" />
-                </span>
+            <>
+              <p className="sidebar__section-label">
+                Mis salas
+              </p>
 
-                <div>
-                  <p className="sidebar__room-name">
-                    {room.name}
-                  </p>
+              {recentOwnedRooms.map((room) => (
 
-                  <p className="sidebar__room-id">
-                    {room.id}
-                  </p>
-                </div>
+                <NavLink
+                  key={room.id}
+                  to={`/room/${room.id}`}
+                  onClick={onClose}
+                  className="sidebar__room-link"
+                >
+                  <span>
+                    <BookOpen
+                      size={20}
+                      color="#a78bfa"
+                    />
+                  </span>
 
-              </NavLink>
-            ))}
+                  <div>
 
-          </div>
+                    <p className="sidebar__room-name">
+                      {room.name}
+                    </p>
+
+                    <p className="sidebar__room-id">
+                      {room.id}
+                    </p>
+
+                  </div>
+
+                </NavLink>
+
+              ))}
+            </>
+
+          )}
+
+          {recentJoinedRooms.length > 0 && (
+
+            <>
+              <p className="sidebar__section-label">
+                Participando
+              </p>
+
+              {recentJoinedRooms.map((room) => (
+
+                <NavLink
+                  key={room.id}
+                  to={`/room/${room.id}`}
+                  onClick={onClose}
+                  className="sidebar__room-link"
+                >
+                  <span>
+                    <BookOpen
+                      size={20}
+                      color="#60a5fa"
+                    />
+                  </span>
+
+                  <div>
+
+                    <p className="sidebar__room-name">
+                      {room.name}
+                    </p>
+
+                    <p className="sidebar__room-id">
+                      {room.id}
+                    </p>
+
+                  </div>
+
+                </NavLink>
+
+              ))}
+            </>
+
+          )}
+
+        </div>
         )}
 
       </section>

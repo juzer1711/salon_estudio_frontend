@@ -17,24 +17,28 @@ import {
 
 interface Props {
   room: StudyRoom;
-}
 
-interface Props {
-  room: StudyRoom;
-
-  onEdit: (
+  onEdit?: (
     room: StudyRoom
   ) => void;
 
-  onDelete: (
+  onDelete?: (
     room: StudyRoom
   ) => void;
+
+  onLeave?: (
+    room: StudyRoom
+  ) => void;
+
+  isJoinedRoom?: boolean;
 }
 
 export default function RoomCard({
   room,
   onEdit,
   onDelete,
+  onLeave,
+  isJoinedRoom = false,
 }: Props): React.JSX.Element {
 
   const navigate = useNavigate();
@@ -107,17 +111,9 @@ export default function RoomCard({
 
           {showMenu && (
 
-            <div className="room-card__menu">
+          <div className="room-card__menu">
 
-              <button
-                className="room-card__menu-item"
-                onClick={() => {
-                  setShowMenu(false);
-                  onEdit(room);
-                }}
-              >
-                Editar sala
-              </button>
+            {isJoinedRoom ? (
 
               <button
                 className="
@@ -126,15 +122,53 @@ export default function RoomCard({
                 "
                 onClick={() => {
                   setShowMenu(false);
-                  onDelete(room);
+
+                  if (onLeave) {
+                    onLeave(room);
+                  }
                 }}
               >
-                Eliminar sala
+                Abandonar sala
               </button>
 
-            </div>
+            ) : (
 
-          )}
+              <>
+                <button
+                  className="room-card__menu-item"
+                  onClick={() => {
+                    setShowMenu(false);
+
+                    if (onEdit) {
+                      onEdit(room);
+                    }
+                  }}
+                >
+                  Editar sala
+                </button>
+
+                <button
+                  className="
+                    room-card__menu-item
+                    room-card__menu-item--danger
+                  "
+                  onClick={() => {
+                    setShowMenu(false);
+
+                    if (onDelete) {
+                      onDelete(room);
+                    }
+                  }}
+                >
+                  Eliminar sala
+                </button>
+              </>
+
+            )}
+
+          </div>
+
+        )}
 
         </div>
 

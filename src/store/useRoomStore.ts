@@ -6,12 +6,16 @@ import {
   getRoomById,
   updateRoom,
   deleteRoom,
+  joinRoom,
+  leaveRoom,
+  getJoinedRooms,
   type StudyRoom,
 } from "../services/roomService";
 
 interface RoomState {
 
   rooms: StudyRoom[];
+  joinedRooms: StudyRoom[];
 
   isFetchingRooms: boolean;
   isCreatingRoom: boolean;
@@ -42,6 +46,16 @@ interface RoomState {
     roomId: string
   ) => Promise<boolean>;
 
+fetchJoinedRooms: () => Promise<void>;
+
+joinExistingRoom: (
+  roomId: string
+) => Promise<boolean>;
+
+leaveJoinedRoom: (
+  roomId: string
+) => Promise<boolean>;
+
   clearError: () => void;
 }
 
@@ -49,6 +63,7 @@ export const useRoomStore =
   create<RoomState>((set) => ({
 
     rooms: [],
+    joinedRooms: [],
 
     isFetchingRooms: false,
     isCreatingRoom: false,
@@ -89,6 +104,7 @@ export const useRoomStore =
         });
       }
     },
+
 
     /**
      * =========================================
@@ -258,6 +274,120 @@ export const useRoomStore =
         return false;
       }
     },
+
+    /**
+ * =========================================
+ * FETCH JOINED ROOMS
+ * =========================================
+ */
+
+fetchJoinedRooms: async () => {
+
+  try {
+
+    set({
+      error: null,
+    });
+
+    const rooms =
+      await getJoinedRooms();
+
+    set({
+      joinedRooms: rooms,
+    });
+
+  } catch (error) {
+
+    set({
+      error:
+        error instanceof Error
+          ? error.message
+          : "Error al obtener salas unidas.",
+    });
+  }
+},
+
+/**
+ * =========================================
+ * JOIN ROOM
+ * =========================================
+ */
+
+joinExistingRoom: async (
+  roomId: string
+) => {
+
+  try {
+
+    set({
+      error: null,
+    });
+
+    await joinRoom(roomId);
+
+    const rooms =
+      await getJoinedRooms();
+
+    set({
+      joinedRooms: rooms,
+    });
+
+    return true;
+
+  } catch (error) {
+
+    set({
+      error:
+        error instanceof Error
+          ? error.message
+          : "Error al unirse a la sala.",
+    });
+
+    return false;
+  }
+},
+
+/**
+ * =========================================
+ * LEAVE ROOM
+ * =========================================
+ */
+
+leaveJoinedRoom: async (
+  roomId: string
+) => {
+
+  try {
+
+    set({
+      error: null,
+    });
+
+    await leaveRoom(roomId);
+
+    set((state) => ({
+      joinedRooms:
+        state.joinedRooms.filter(
+          (room) => room.id !== roomId
+        ),
+    }));
+
+    return true;
+
+  } catch (error) {
+
+    set({
+      error:
+        error instanceof Error
+          ? error.message
+          : "Error al abandonar la sala.",
+    });
+
+    return false;
+  }
+},
+
+    
 
     /**
      * =========================================

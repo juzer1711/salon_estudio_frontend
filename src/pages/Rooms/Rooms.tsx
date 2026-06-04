@@ -22,7 +22,7 @@ import { useSnackbar } from "../../context/SnackbarContext";
 import { useNavigate } from "react-router-dom";
 import emptyImage from "../../assets/IMAGVACIO.png";
 
-import { BookOpen, Zap } from "lucide-react";
+import { BookOpen, Zap, Rocket  } from "lucide-react";
 
 import "./Rooms.css";
 
@@ -30,16 +30,27 @@ export default function Rooms(): React.JSX.Element {
 
   const {
     rooms,
+    joinedRooms,
+
     isCreatingRoom,
     isFetchingRooms,
     isSearchingRoom,
+
     error,
+
     fetchMyRooms,
+    fetchJoinedRooms,
+
     createNewRoom,
-    clearError,
     searchRoomById,
+
+    joinExistingRoom,
+    leaveJoinedRoom,
+
     editRoom,
     removeRoom,
+
+    clearError,
   } = useRoomStore();
 
   const { showSnackbar } =
@@ -64,6 +75,9 @@ export default function Rooms(): React.JSX.Element {
 
   const [deletingRoom, setDeletingRoom] =
     useState<StudyRoom | null>(null);
+  
+  const [leavingRoom, setLeavingRoom] =
+    useState<StudyRoom | null>(null);
 
   /**
    * =========================================
@@ -73,7 +87,11 @@ export default function Rooms(): React.JSX.Element {
 
   useEffect(() => {
     fetchMyRooms();
-  }, [fetchMyRooms]);
+    fetchJoinedRooms();
+  }, [
+    fetchMyRooms,
+    fetchJoinedRooms,
+  ]);
 
   /**
    * =========================================
@@ -161,6 +179,38 @@ export default function Rooms(): React.JSX.Element {
     }
 
     setFoundRoom(room);
+  };
+
+  const handleJoinRoom = async () => {
+
+    if (!foundRoom) return;
+
+    const success =
+      await joinExistingRoom(
+        foundRoom.id
+      );
+
+    if (!success) {
+      return;
+    }
+
+    showSnackbar(
+      "Te has unido a la sala.",
+      "success"
+    );
+
+    await fetchJoinedRooms();
+
+  showSnackbar(
+    "Te has unido a la sala.",
+    "success"
+  );
+
+  navigate(
+    `/room/${foundRoom.id}`
+  );
+
+    setFoundRoom(null);
   };
 
   return (
@@ -361,9 +411,9 @@ export default function Rooms(): React.JSX.Element {
 
               <section className="rooms-found">
 
-                <div className="rooms-found__icon">
-                  🚀
-                </div>
+              <span>
+                <Rocket size={36} color="#a78bfa" />
+              </span>
 
                 <div className="rooms-found__content">
 
@@ -410,12 +460,10 @@ export default function Rooms(): React.JSX.Element {
 
                   <button
                     type="button"
-                    onClick={() =>
-                      navigate(`/room/${foundRoom.id}`)
-                    }
+                    onClick={handleJoinRoom}
                     className="rooms-found__enter"
                   >
-                    Entrar
+                    Unirme
                   </button>
 
                 </div>
@@ -527,6 +575,47 @@ export default function Rooms(): React.JSX.Element {
 
           </section>
 
+          <section className="rooms-list">
+
+            <div className="rooms-list__header">
+
+              <h2 className="rooms-list__title">
+                Salas en las que participo
+              </h2>
+
+              <span className="rooms-list__count">
+                {joinedRooms.length} salas
+              </span>
+
+            </div>
+
+            {joinedRooms.length === 0 ? (
+
+              <p className="rooms-empty-text">
+                No participas en ninguna sala.
+              </p>
+
+            ) : (
+
+              <div className="rooms-grid">
+
+                {joinedRooms.map((room) => (
+
+                  <RoomCard
+                    key={room.id}
+                    room={room}
+                    isJoinedRoom
+                    onLeave={setLeavingRoom}
+                  />
+
+                ))}
+
+              </div>
+
+            )}
+
+          </section>
+
         </section>
 
       </main>
@@ -591,6 +680,36 @@ export default function Rooms(): React.JSX.Element {
         />
 
       )}
+
+          {leavingRoom && (
+
+      <DeleteRoomModal
+        roomName={leavingRoom.name}
+        onClose={() =>
+          setLeavingRoom(null)
+        }
+        onConfirm={async () => {
+
+          const success =
+            await leaveJoinedRoom(
+              leavingRoom.id
+            );
+
+          if (success) {
+
+            showSnackbar(
+              "Has abandonado la sala.",
+              "success"
+            );
+
+            setLeavingRoom(null);
+
+          }
+
+        }}
+      />
+
+    )}
 
     </AppLayout>
   );
