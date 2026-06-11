@@ -65,3 +65,24 @@ export const getChatHistory = (
     roomId
   );
 };
+
+export const sendWebRtcOffer = (data: {
+  targetSocketId: string;
+  offer: RTCSessionDescriptionInit;
+}): void => {
+  socket.emit("webrtc-offer", data);
+};
+ 
+export const sendWebRtcAnswer = (data: {
+  targetSocketId: string;
+  answer: RTCSessionDescriptionInit;
+}): void => {
+  socket.emit("webrtc-answer", data);
+};
+ 
+export const sendIceCandidate = (data: {
+  targetSocketId: string;
+  candidate: RTCIceCandidateInit;
+}): void => {
+  socket.emit("webrtc-ice-candidate", data);
+};

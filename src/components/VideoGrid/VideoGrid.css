@@ -1,0 +1,302 @@
+/* src/components/VideoGrid/VideoGrid.css */
+
+/**
+ * =========================================
+ * VIDEO GRID — cuadrícula dinámica
+ * Se adapta automáticamente según el número
+ * de participantes (igual que Google Meet)
+ * =========================================
+ */
+.video-grid {
+  position: relative;
+  display: grid;
+  gap: 0.6rem;
+  padding: 1rem;
+  background: rgba(7, 11, 22, 0.7);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  height: 100%;
+  min-height: 340px;
+  /* Padding bottom para dejar espacio a los controles */
+  padding-bottom: 5.5rem;
+}
+
+/* Layouts de cuadrícula según cantidad */
+.video-grid--count-1 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.video-grid--count-2 {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+}
+
+.video-grid--count-3,
+.video-grid--count-4 {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.video-grid--count-5,
+.video-grid--count-6 {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.video-grid--count-7,
+.video-grid--count-8,
+.video-grid--count-9 {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+/**
+ * =========================================
+ * VIDEO CARD — tarjeta individual
+ * =========================================
+ */
+.video-card {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease;
+}
+
+/* Tarjeta propia con borde púrpura sutil */
+.video-card--local {
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+.video-card--no-camera {
+  background: rgba(10, 15, 28, 0.9);
+}
+
+/* ---- VIDEO ELEMENT ---- */
+.video-card__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  /* El video local se espeja como en Meet */
+}
+
+.video-card--local .video-card__video {
+  transform: scaleX(-1);
+}
+
+.video-card__video--hidden {
+  display: none;
+}
+
+/* ---- AVATAR FALLBACK ---- */
+.video-card__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.video-card__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-card__avatar-initial {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+/* ---- FOOTER ---- */
+.video-card__footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, transparent 100%);
+}
+
+.video-card__name {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #f1f5f9;
+  font-size: 0.78rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.video-card__you-tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #c4b5fd;
+  background: rgba(124, 58, 237, 0.3);
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  border-radius: 999px;
+  padding: 0.05rem 0.4rem;
+}
+
+.video-card__av {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.video-card__av-icon--on {
+  color: #34d399;
+}
+
+.video-card__av-icon--off {
+  color: #ef4444;
+}
+
+/* ---- LOCAL BADGE ---- */
+.video-card__local-badge {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  background: rgba(124, 58, 237, 0.75);
+  color: #ede9fe;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  backdrop-filter: blur(6px);
+}
+
+/**
+ * =========================================
+ * CONTROLES AV — barra inferior del grid
+ * =========================================
+ */
+.video-grid__controls {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  background: rgba(10, 15, 28, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  backdrop-filter: blur(16px);
+  z-index: 10;
+  white-space: nowrap;
+}
+
+.video-grid__control-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 41, 59, 0.5);
+  color: #cbd5e1;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.video-grid__control-btn:hover {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #f8fafc;
+  transform: translateY(-1px);
+}
+
+/* Estado activo = silenciado/cam apagada → color de alerta */
+.video-grid__control-btn--active {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.video-grid__control-btn--active:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fee2e2;
+}
+
+.video-grid__control-label {
+  font-size: 0.75rem;
+}
+
+/**
+ * =========================================
+ * RESPONSIVE
+ * =========================================
+ */
+@media (max-width: 900px) {
+  .video-grid--count-3,
+  .video-grid--count-4,
+  .video-grid--count-5,
+  .video-grid--count-6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .video-grid--count-7,
+  .video-grid--count-8,
+  .video-grid--count-9 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .video-grid {
+    padding-bottom: 5rem;
+  }
+
+  .video-grid__control-label {
+    display: none;
+  }
+
+  .video-grid__control-btn {
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+  }
+}
+
+/**
+ * =========================================
+ * REDUCE MOTION
+ * =========================================
+ */
+@media (prefers-reduced-motion: reduce) {
+  .video-grid__control-btn {
+    transition: none;
+  }
+}

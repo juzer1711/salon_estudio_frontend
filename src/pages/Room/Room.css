@@ -4,7 +4,7 @@
   position: relative;
   overflow: hidden;
   padding: 6rem 1.5rem 3rem;
-  background-color: #0b0f19; /* Fondo base ultra oscuro profundo */
+  background-color: #0b0f19;
 }
 
 /**
@@ -15,7 +15,7 @@
 .room__container {
   position: relative;
   z-index: 2;
-  max-width: 1200px;
+  max-width: 1400px; /* Más ancho para acomodar el grid de video */
   margin: 0 auto;
 }
 
@@ -95,7 +95,6 @@
   line-height: 1.6;
 }
 
-/* Connection status */
 .room__connection {
   display: inline-flex;
   align-items: center;
@@ -129,7 +128,6 @@
   50% { opacity: 0.4; transform: scale(0.9); }
 }
 
-/* Actions wrapper fixed */
 .room__actions {
   position: relative;
   display: flex;
@@ -137,7 +135,6 @@
   gap: 0.75rem;
 }
 
-/* Room ID pill styled */
 .room__room-id {
   display: flex;
   flex-direction: column;
@@ -174,7 +171,7 @@
   border: 1px solid rgba(124, 58, 237, 0.2);
   border-radius: 12px;
   background: rgba(124, 58, 237, 0.08);
-  color: #c4b5fd; /* Color explícito para el icono interno */
+  color: #c4b5fd;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -186,7 +183,6 @@
   transform: translateY(-1px);
 }
 
-/* Menú desplegable flotante con efecto Glassmorphism */
 .room__menu {
   position: absolute;
   top: 52px;
@@ -226,10 +222,7 @@
   color: #f8fafc;
 }
 
-.room__menu-item--danger {
-  color: #fca5a5;
-}
-
+.room__menu-item--danger { color: #fca5a5; }
 .room__menu-item--danger:hover {
   background: rgba(239, 68, 68, 0.15);
   color: #fef2f2;
@@ -237,200 +230,17 @@
 
 /**
  * =========================================
- * ROOM CONTENT GRID
+ * ROOM CONTENT — 2 columnas tipo Meet
+ * Columna izq: Video Grid (flexible)
+ * Columna der: Chat (ancho fijo)
  * =========================================
  */
 .room-content {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 1fr 360px;
+  gap: 1.25rem;
   align-items: start;
-}
-
-/**
- * =========================================
- * SIDEBAR
- * =========================================
- */
-.room-sidebar {
-  display: flex;
-  flex-direction: column;
-  border-radius: 20px;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  overflow: hidden;
   height: 72vh;
-}
-
-.room-sidebar__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  flex-shrink: 0;
-}
-
-.room-sidebar__header-left {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  color: #64748b;
-}
-
-.room-sidebar__header-left h2 {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #e2e8f0;
-  margin: 0;
-}
-
-.room-sidebar__count {
-  padding: 0.15rem 0.6rem;
-  border-radius: 6px;
-  background: rgba(124, 58, 237, 0.15);
-  border: 1px solid rgba(124, 58, 237, 0.3);
-  color: #c4b5fd;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.room-sidebar__list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.room-sidebar__list::-webkit-scrollbar {
-  width: 4px;
-}
-
-.room-sidebar__list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
-}
-
-.room-sidebar__empty {
-  color: #475569;
-  font-size: 0.85rem;
-  text-align: center;
-  padding: 2rem 0;
-}
-
-/* Participant card refined */
-.room-sidebar__participant {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.7rem 0.85rem;
-  border-radius: 12px;
-  background: rgba(30, 41, 59, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  transition: all 0.2s ease;
-}
-
-.room-sidebar__participant:hover {
-  background: rgba(30, 41, 59, 0.5);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.room-sidebar__participant--me {
-  border-color: rgba(124, 58, 237, 0.3);
-  background: rgba(124, 58, 237, 0.05);
-}
-
-/* Avatar styling */
-.room-sidebar__avatar-wrap {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.room-sidebar__avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #7c3aed, #3b82f6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 0.85rem;
-  overflow: hidden;
-}
-
-.room-sidebar__avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.room-sidebar__online-dot {
-  position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: #34d399;
-  border: 2px solid #0f172a;
-}
-
-/* Info */
-.room-sidebar__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.room-sidebar__name {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: #f1f5f9;
-  font-size: 0.85rem;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.room-sidebar__you-tag {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #c4b5fd;
-  background: rgba(124, 58, 237, 0.15);
-  border: 1px solid rgba(124, 58, 237, 0.2);
-  border-radius: 999px;
-  padding: 0.05rem 0.4rem;
-}
-
-.room-sidebar__status {
-  display: block;
-  color: #475569;
-  font-size: 0.75rem;
-  margin-top: 0.1rem;
-}
-
-/* AV micro & camera indicators */
-.room-sidebar__av {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-shrink: 0;
-}
-
-.room-sidebar__av-icon--on {
-  color: #34d399;
-  opacity: 0.9;
-}
-
-.room-sidebar__av-icon--off {
-  color: #ef4444;
-  opacity: 0.9;
 }
 
 /**
@@ -458,10 +268,7 @@
   gap: 0.25rem;
 }
 
-.room-chat__messages::-webkit-scrollbar {
-  width: 5px;
-}
-
+.room-chat__messages::-webkit-scrollbar { width: 5px; }
 .room-chat__messages::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.08);
   border-radius: 999px;
@@ -501,7 +308,7 @@
 .room-message {
   display: flex;
   gap: 0.75rem;
-  max-width: 75%;
+  max-width: 85%;
   margin-bottom: 0.1rem;
 }
 
@@ -518,7 +325,6 @@
   align-self: flex-start;
 }
 
-/* Message Avatar */
 .room-message__avatar {
   width: 34px;
   height: 34px;
@@ -536,10 +342,9 @@
 }
 
 .room-message__avatar--hidden {
-  display: none; /* Mejor control espacial de los consecutivos */
+  display: none;
 }
 
-/* Content bubble styling */
 .room-message__content {
   position: relative;
   padding: 0.65rem 0.95rem;
@@ -559,10 +364,9 @@
   border-bottom-left-radius: 4px;
 }
 
-/* Consecutive bubble corners smoothness */
 .room-message--consecutive.room-message--own .room-message__content {
   border-top-right-radius: 6px;
-  margin-right: 42px; /* Alineación perfecta al ocultar avatar */
+  margin-right: 42px;
 }
 
 .room-message--consecutive.room-message--other .room-message__content {
@@ -636,10 +440,7 @@
   transition: all 0.2s ease;
 }
 
-.room-chat__input::placeholder {
-  color: #475569;
-}
-
+.room-chat__input::placeholder { color: #475569; }
 .room-chat__input:focus {
   border-color: rgba(124, 58, 237, 0.4);
   background: rgba(15, 23, 42, 0.8);
@@ -649,9 +450,9 @@
 .room-chat__form button {
   height: 46px;
   flex-shrink: 0;
+  width: auto !important;
 }
 
-/* Fix avatar propio desbordado */
 .room-message__avatar-image {
   width: 100%;
   height: 100%;
@@ -659,38 +460,25 @@
   border-radius: 50%;
 }
 
-/* Fix botón enviar */
-.room-chat__form button {
-  height: 46px;
-  flex-shrink: 0;
-  width: auto !important;
-}
-
 /**
  * =========================================
- * RESPONSIVE ADAPTATIONS
+ * RESPONSIVE
  * =========================================
  */
-@media (max-width: 900px) {
+
+/* Tablet: video arriba, chat abajo */
+@media (max-width: 1100px) {
   .room-content {
     grid-template-columns: 1fr;
-  }
-
-  .room-sidebar {
     height: auto;
-    max-height: 200px;
   }
 
-  .room-sidebar__list {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .room-sidebar__participant {
-    width: calc(50% - 0.25rem);
+  .room-chat {
+    height: 50vh;
   }
 }
 
+/* Mobile */
 @media (max-width: 600px) {
   .room {
     padding: 5rem 1rem 2rem;
@@ -707,7 +495,7 @@
   }
 
   .room-chat {
-    height: 65vh;
+    height: 55vh;
   }
 
   .room-message {
@@ -725,13 +513,12 @@
 
 /**
  * =========================================
- * REDUCE MOTION ACCESSIBILITY
+ * REDUCE MOTION
  * =========================================
  */
 @media (prefers-reduced-motion: reduce) {
   .room__back,
   .room-chat__input,
-  .room-sidebar__participant,
   .room__connection-dot--on,
   .room__menu {
     transition: none;

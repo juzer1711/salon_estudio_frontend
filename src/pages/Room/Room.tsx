@@ -4,41 +4,26 @@ import {
   type FormEvent,
   useEffect,
   useRef,
-  useState
+  useState,
 } from "react";
 
 import EditRoomModal from "../../components/modals/EditRoomModal";
 import DeleteRoomModal from "../../components/modals/DeleteRoomModal";
+import VideoGrid from "../../components/VideoGrid/VideoGrid";
 
-import {
-  useNavigate,
-  useParams,
-} from "react-router-dom";
-
+import { useNavigate, useParams } from "react-router-dom";
 import type { StudyRoom } from "../../services/roomService";
-
 import AppLayout from "../../layouts/AppLayout";
 import Button from "../../components/ui/Button";
-
-// Combinamos todos los iconos necesarios de Lucide
-import { 
-  MessageSquareOff, 
-  Mic, 
-  MicOff, 
-  Video, 
-  VideoOff, 
-  LogOut, 
-  Users, 
-  MoreVertical 
-} from "lucide-react";
+import { MessageSquareOff, LogOut, MoreVertical } from "lucide-react";
 
 import { useRoomSocket } from "../../hooks/useRoomSocket";
+import { useWebRTC } from "../../hooks/useWebRTC";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useRoomStore } from "../../store/useRoomStore";
 import { useSnackbar } from "../../context/SnackbarContext";
-import "./Room.css";
-
 import { formatTime } from "../../utils/formatDate";
+import "./Room.css";
 
 export default function Room(): React.JSX.Element {
   const { roomId } = useParams<{ roomId: string }>();
@@ -46,7 +31,6 @@ export default function Room(): React.JSX.Element {
   const { profile } = useAuthStore();
   const { showSnackbar } = useSnackbar();
 
-  // Estados traídos de la otra rama para control de UI y Modales
   const [message, setMessage] = useState<string>("");
   const [currentRoom, setCurrentRoom] = useState<StudyRoom | null>(null);
   const [showMenu, setShowMenu] = useState(false);
@@ -57,7 +41,7 @@ export default function Room(): React.JSX.Element {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Tu lógica de Sockets (¡Indispensable para que el chat viva!)
+  // ── Socket (chat + participantes) ────────────────────────────
   const {
     messages,
     participants,
@@ -68,18 +52,28 @@ export default function Room(): React.JSX.Element {
     uid: profile?.uid ?? "",
     username: profile?.username ?? "",
     avatarUrl: profile?.avatarUrl ?? "",
-    onParticipantJoined: (username) => {
-      showSnackbar(`${username} se unió a la sala 👋`, "success");
-    },
-    onParticipantLeft: (username) => {
-      showSnackbar(`${username} abandonó la sala`, "error");
-    },
+    onParticipantJoined: (username) =>
+      showSnackbar(`${username} se unió a la sala 👋`, "success"),
+    onParticipantLeft: (username) =>
+      showSnackbar(`${username} abandonó la sala`, "error"),
   });
 
-  // Métodos de la tienda de cuartos
-  const { searchRoomById, editRoom, removeRoom } = useRoomStore();
+  // ── WebRTC (cámara, micrófono, peers) ────────────────────────
+  // Recibe la misma lista `participants` del socket y
+  // crea/destruye RTCPeerConnections automáticamente
+  const {
+    localStream,
+    remoteStreams,
+    isMuted,
+    isCameraOff,
+    toggleMute,
+    toggleCamera,
+  } = useWebRTC({
+    participants,
+    localUid: profile?.uid ?? "",
+  });
 
-  // Saber si el usuario actual es el creador de la sala
+  const { searchRoomById, editRoom, removeRoom } = useRoomStore();
   const isOwner = profile?.uid === currentRoom?.ownerUid;
 
   if (!roomId || !profile) {
@@ -92,81 +86,68 @@ export default function Room(): React.JSX.Element {
     );
   }
 
-  // =========================================
-  // LOAD ROOM
-  // =========================================
+  // ── Cargar sala ───────────────────────────────────────────────
   useEffect(() => {
     const loadRoom = async () => {
-      if (!roomId) return;
       const room = await searchRoomById(roomId);
-      if (!room) {
-        navigate("/rooms");
-        return;
-      }
+      if (!room) { navigate("/rooms"); return; }
       setCurrentRoom(room);
     };
     loadRoom();
   }, [roomId, searchRoomById, navigate]);
 
-  // =========================================
-  // AUTO SCROLL
-  // =========================================
+  // ── Auto scroll chat ──────────────────────────────────────────
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // =========================================
-  // CLICK OUTSIDE (Para cerrar el menú de tres puntos)
-  // =========================================
+  // ── Click outside menú ────────────────────────────────────────
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setShowMenu(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // =========================================
-  // HANDLERS
-  // =========================================
-  const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
-    event.preventDefault();
+  // ── Handlers ─────────────────────────────────────────────────
+  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
     if (!message.trim()) return;
-
     sendChatMessage(message);
     setMessage("");
     inputRef.current?.focus();
   };
 
-  const handleLeaveRoom = (): void => {
-    navigate("/rooms");
+  // Participante local con la misma forma que Participant
+  const localParticipant = {
+    uid: profile.uid,
+    username: profile.username,
+    avatarUrl: profile.avatarUrl ?? "",
+    socketId: "local",
   };
-  const getInitial = (name: string): string =>
-    name?.[0]?.toUpperCase() ?? "?";
 
+  // Participantes remotos = todos salvo el usuario actual
+  const remoteParticipants = participants.filter((p) => p.uid !== profile.uid);
 
   return (
     <AppLayout>
       <main className="room">
         <section className="room__container">
 
-          {/* HEADER */}
+          {/* ── HEADER ─────────────────────────────────────────── */}
           <header className="room__header">
             <div className="room__header-left">
               <button
                 type="button"
                 className="room__back"
-                onClick={handleLeaveRoom}
+                onClick={() => navigate("/rooms")}
                 aria-label="Salir de la sesión"
               >
-                <LogOut size={16} />
-                Salir
+                <LogOut size={16} /> Salir
               </button>
-
               <div>
                 <div className="room__badge">Sala colaborativa</div>
                 <h1 className="room__title">
@@ -182,13 +163,11 @@ export default function Room(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Acciones de la sala (ID + Menú de dueño si aplica) */}
             <div className="room__actions" ref={menuRef}>
               <div className="room__room-id">
                 <span className="room__room-id-label">ID de sala: </span>
                 <span className="room__room-id-value">{roomId}</span>
               </div>
-
               {isOwner && (
                 <button
                   type="button"
@@ -198,25 +177,12 @@ export default function Room(): React.JSX.Element {
                   <MoreVertical size={18} />
                 </button>
               )}
-
               {showMenu && (
                 <div className="room__menu">
-                  <button
-                    className="room__menu-item"
-                    onClick={() => {
-                      setShowMenu(false);
-                      setEditingRoom(currentRoom);
-                    }}
-                  >
+                  <button className="room__menu-item" onClick={() => { setShowMenu(false); setEditingRoom(currentRoom); }}>
                     Editar sala
                   </button>
-                  <button
-                    className="room__menu-item room__menu-item--danger"
-                    onClick={() => {
-                      setShowMenu(false);
-                      setDeletingRoom(currentRoom);
-                    }}
-                  >
+                  <button className="room__menu-item room__menu-item--danger" onClick={() => { setShowMenu(false); setDeletingRoom(currentRoom); }}>
                     Eliminar sala
                   </button>
                 </div>
@@ -224,83 +190,23 @@ export default function Room(): React.JSX.Element {
             </div>
           </header>
 
-          {/* CONTENT */}
+          {/* ── CONTENT: Video Grid + Chat ──────────────────────── */}
           <section className="room-content">
 
-            {/* SIDEBAR — PARTICIPANTS */}
-            <aside className="room-sidebar" aria-labelledby="participants-title">
-              <div className="room-sidebar__header">
-                <div className="room-sidebar__header-left">
-                  <Users size={16} />
-                  <h2 id="participants-title">Participantes</h2>
-                </div>
-                <span className="room-sidebar__count">
-                  {participants.length}
-                </span>
-              </div>
-
-              <div className="room-sidebar__list" role="list">
-                {participants.length === 0 ? (
-                  <p className="room-sidebar__empty">
-                    Aún no hay participantes.
-                  </p>
-                ) : (
-                  participants.map((participant) => {
-                    const isMuted = false;
-                    const isCameraOff = false;
-                    const isMe = participant.uid === profile.uid;
-
-                    return (
-                      <article
-                        key={participant.socketId}
-                        className={`room-sidebar__participant ${isMe ? "room-sidebar__participant--me" : ""}`}
-                        role="listitem"
-                        aria-label={`${participant.username}${isMe ? ", tú" : ""}`}
-                      >
-                        <div className="room-sidebar__avatar-wrap">
-                          <div className="room-sidebar__avatar">
-                            {participant.avatarUrl ? (
-                              <img
-                                src={participant.avatarUrl}
-                                alt={participant.username}
-                                className="room-sidebar__avatar-img"
-                                referrerPolicy="no-referrer"
-                              />
-                            ) : (
-                              <span>{getInitial(participant.username)}</span>
-                            )}
-                          </div>
-                          <span className="room-sidebar__online-dot" aria-hidden="true" />
-                        </div>
-
-                        <div className="room-sidebar__info">
-                          <p className="room-sidebar__name">
-                            @{participant.username}
-                            {isMe && <span className="room-sidebar__you-tag">tú</span>}
-                          </p>
-                          <small className="room-sidebar__status">Conectado</small>
-                        </div>
-
-                        <div className="room-sidebar__av" aria-label={`${isMuted ? "Micrófono silenciado" : "Micrófono activo"}, ${isCameraOff ? "Cámara apagada" : "Cámara activa"}`}>
-                          {isMuted
-                            ? <MicOff size={14} className="room-sidebar__av-icon room-sidebar__av-icon--off" aria-hidden="true" />
-                            : <Mic size={14} className="room-sidebar__av-icon room-sidebar__av-icon--on" aria-hidden="true" />
-                          }
-                          {isCameraOff
-                            ? <VideoOff size={14} className="room-sidebar__av-icon room-sidebar__av-icon--off" aria-hidden="true" />
-                            : <Video size={14} className="room-sidebar__av-icon room-sidebar__av-icon--on" aria-hidden="true" />
-                          }
-                        </div>
-                      </article>
-                    );
-                  })
-                )}
-              </div>
-            </aside>
+            {/* VIDEO GRID — pasa los streams remotos por socketId */}
+            <VideoGrid
+              participants={remoteParticipants}
+              localParticipant={localParticipant}
+              localStream={localStream}
+              remoteStreams={remoteStreams}
+              localAV={{ isMuted, isCameraOff }}
+              onToggleMute={toggleMute}
+              onToggleCamera={toggleCamera}
+            />
 
             {/* CHAT */}
             <section className="room-chat" aria-label="Chat de la sala">
-              <div className="room-chat__messages" role="log" aria-live="polite" aria-label="Mensajes del chat">
+              <div className="room-chat__messages" role="log" aria-live="polite">
                 {messages.length === 0 ? (
                   <div className="room-chat__empty">
                     <MessageSquareOff size={48} strokeWidth={1.5} />
@@ -309,10 +215,8 @@ export default function Room(): React.JSX.Element {
                   </div>
                 ) : (
                   messages.map((chat, index) => {
-                    const isOwn = chat.username === profile?.username;
-                    const prevMessage = messages[index - 1];
-                    const isConsecutive = prevMessage?.username === chat.username;
-                    
+                    const isOwn = chat.username === profile.username;
+                    const isConsecutive = messages[index - 1]?.username === chat.username;
 
                     return (
                       <article
@@ -322,19 +226,11 @@ export default function Room(): React.JSX.Element {
                       >
                         <div className={`room-message__avatar ${isConsecutive ? "room-message__avatar--hidden" : ""}`} aria-hidden="true">
                           {!isConsecutive && (
-                            chat.avatarUrl ? (
-                              <img
-                                src={chat.avatarUrl}
-                                alt={chat.username}
-                                className="room-message__avatar-image"
-                                referrerPolicy="no-referrer"
-                              />
-                            ) : (
-                              <span>{getInitial(chat.username)}</span>
-                            )
+                            chat.avatarUrl
+                              ? <img src={chat.avatarUrl} alt={chat.username} className="room-message__avatar-image" referrerPolicy="no-referrer" />
+                              : <span>{chat.username?.[0]?.toUpperCase() ?? "?"}</span>
                           )}
                         </div>
-
                         <div className="room-message__content">
                           {!isConsecutive && (
                             <div className="room-message__header">
@@ -356,7 +252,6 @@ export default function Room(): React.JSX.Element {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* INPUT */}
               <form onSubmit={handleSubmit} className="room-chat__form">
                 <input
                   ref={inputRef}
@@ -367,11 +262,7 @@ export default function Room(): React.JSX.Element {
                   className="room-chat__input"
                   aria-label="Campo de mensaje"
                 />
-                <Button
-                  type="submit"
-                  disabled={!message.trim()}
-                  aria-label="Enviar mensaje"
-                >
+                <Button type="submit" disabled={!message.trim()} aria-label="Enviar mensaje">
                   Enviar
                 </Button>
               </form>
@@ -381,7 +272,6 @@ export default function Room(): React.JSX.Element {
         </section>
       </main>
 
-      {/* MODALES TRÁIDOS DE LA OTRA RAMA */}
       {editingRoom && (
         <EditRoomModal
           currentName={editingRoom.name}
@@ -389,10 +279,7 @@ export default function Room(): React.JSX.Element {
           onSave={async (newName) => {
             const success = await editRoom(editingRoom.id, newName);
             if (success) {
-              setCurrentRoom((prev: any) => ({
-                ...prev,
-                name: newName,
-              }));
+              setCurrentRoom((prev: any) => ({ ...prev, name: newName }));
               showSnackbar("Sala actualizada correctamente.", "success");
               setEditingRoom(null);
             }
@@ -409,7 +296,7 @@ export default function Room(): React.JSX.Element {
             if (success) {
               showSnackbar("Sala eliminada correctamente.", "success");
               setDeletingRoom(null);
-              navigate("/rooms"); // Te saca de la sala si fue eliminada
+              navigate("/rooms");
             }
           }}
         />
