@@ -10,6 +10,7 @@ interface VideoCardProps {
   stream?: MediaStream | null;
   isMuted?: boolean;
   isCameraOff?: boolean;
+  isSpeaking?: boolean;
 }
 
 const getInitial = (name: string): string =>
@@ -21,6 +22,7 @@ export default function VideoCard({
   stream = null,
   isMuted = false,
   isCameraOff = false,
+  isSpeaking = false,
 }: VideoCardProps): React.JSX.Element {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -32,10 +34,16 @@ export default function VideoCard({
   }, [stream]);
 
   const showVideo = !!stream && !isCameraOff;
+  const cardClassName = [
+    "video-card",
+    isLocal ? "video-card--local" : "",
+    isCameraOff ? "video-card--no-camera" : "",
+    isSpeaking ? "video-card--speaking" : "",
+  ].filter(Boolean).join(" ");
 
   return (
     <article
-      className={`video-card ${isLocal ? "video-card--local" : ""} ${isCameraOff ? "video-card--no-camera" : ""}`}
+      className={cardClassName}
       aria-label={`Video de ${participant.username}${isLocal ? ", tú" : ""}`}
     >
       {/* VIDEO ELEMENT — oculto cuando cámara apagada */}

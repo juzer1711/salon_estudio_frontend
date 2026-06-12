@@ -61,7 +61,14 @@ export function useRoomSocket({
 
       setIsConnected(true);
 
-      joinRoom({ roomId, uid, username, avatarUrl });
+      joinRoom({
+        roomId,
+        uid,
+        username,
+        avatarUrl,
+        isCameraOn: true,
+        isMicrophoneOn: true,
+      });
 
       getChatHistory(roomId);
     });

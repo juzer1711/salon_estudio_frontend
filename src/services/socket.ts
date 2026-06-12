@@ -20,6 +20,8 @@ export const joinRoom = (
     uid: string;
     username: string;
     avatarUrl?: string;
+    isCameraOn?: boolean;
+    isMicrophoneOn?: boolean;
   }
 ): void => {
 
@@ -85,4 +87,11 @@ export const sendIceCandidate = (data: {
   candidate: RTCIceCandidateInit;
 }): void => {
   socket.emit("webrtc-ice-candidate", data);
+};
+
+export const sendParticipantMediaState = (data: {
+  isCameraOn?: boolean;
+  isMicrophoneOn?: boolean;
+}): void => {
+  socket.emit("participant-media-state", data);
 };

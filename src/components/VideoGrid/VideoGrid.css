@@ -33,6 +33,13 @@
   grid-template-rows: 1fr;
 }
 
+.video-grid--count-1 .video-card,
+.video-grid--count-2 .video-card {
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+
 .video-grid--count-3,
 .video-grid--count-4 {
   grid-template-columns: repeat(2, 1fr);
@@ -59,20 +66,39 @@
  */
 .video-card {
   position: relative;
+
   border-radius: 14px;
+
   overflow: hidden;
+
   background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  border: 2px solid rgba(255,255,255,.05);
+
   aspect-ratio: 16 / 9;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.2s ease;
+
+  transition:
+    border-color .18s ease,
+    box-shadow .18s ease;
 }
 
 /* Tarjeta propia con borde púrpura sutil */
 .video-card--local {
   border-color: rgba(124, 58, 237, 0.3);
+}
+
+.video-card--speaking {
+
+  border-color: #22c55e;
+
+  box-shadow:
+    0 0 0 2px rgba(34,197,94,.25),
+    0 0 18px rgba(34,197,94,.55);
+
 }
 
 .video-card--no-camera {

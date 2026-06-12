@@ -66,6 +66,7 @@ export default function Room(): React.JSX.Element {
     remoteStreams,
     isMuted,
     isCameraOff,
+    speakingParticipants,
     toggleMute,
     toggleCamera,
   } = useWebRTC({
@@ -202,6 +203,7 @@ export default function Room(): React.JSX.Element {
               localAV={{ isMuted, isCameraOff }}
               onToggleMute={toggleMute}
               onToggleCamera={toggleCamera}
+              speakingParticipants={speakingParticipants}
             />
 
             {/* CHAT */}
