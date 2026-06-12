@@ -17,6 +17,7 @@ interface VideoGridProps {
   /** Map de socketId → MediaStream remoto — viene de useWebRTC */
   remoteStreams: Map<string, MediaStream>;
   localAV: LocalAVState;
+  speakingParticipants: Set<string>;
   onToggleMute: () => void;
   onToggleCamera: () => void;
 }
@@ -27,6 +28,7 @@ export default function VideoGrid({
   localStream,
   remoteStreams,
   localAV,
+  speakingParticipants,
   onToggleMute,
   onToggleCamera,
 }: VideoGridProps): React.JSX.Element {
@@ -45,6 +47,7 @@ export default function VideoGrid({
           stream={localStream}
           isMuted={localAV.isMuted}
           isCameraOff={localAV.isCameraOff}
+          isSpeaking={speakingParticipants.has("local")}
         />
       )}
 
@@ -55,8 +58,9 @@ export default function VideoGrid({
           participant={participant}
           isLocal={false}
           stream={remoteStreams.get(participant.socketId) ?? null}
-          isMuted={false}    // TODO US-13: señalización de estado AV remoto
-          isCameraOff={false}
+          isMuted={participant.isMicrophoneOn === false}
+          isCameraOff={participant.isCameraOn === false}
+          isSpeaking={speakingParticipants.has(participant.socketId)}
         />
       ))}
 

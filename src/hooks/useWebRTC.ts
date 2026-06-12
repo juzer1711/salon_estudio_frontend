@@ -12,6 +12,7 @@ import {
   sendWebRtcOffer,
   sendWebRtcAnswer,
   sendIceCandidate,
+  sendParticipantMediaState,
 } from "../services/socket";
 import { WebRtcService } from "../services/webRtcService";
 import type { Participant } from "../types/socket";
@@ -26,6 +27,7 @@ interface UseWebRTCReturn {
   remoteStreams: Map<string, MediaStream>;
   isMuted: boolean;
   isCameraOff: boolean;
+  speakingParticipants: Set<string>;
   toggleMute: () => void;
   toggleCamera: () => void;
 }
@@ -40,8 +42,13 @@ export function useWebRTC({
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
 
+  const [speakingParticipants, setSpeakingParticipants] =
+    useState<Set<string>>(new Set());
+
   const serviceRef = useRef<WebRtcService | null>(null);
   const prevParticipantsRef = useRef<Participant[]>([]);
+  const speakingCleanups =
+    useRef<Map<string, () => void>>(new Map());
 
   // ─────────────────────────────────────────────────────────────
   // 1. INICIALIZAR SERVICIO + STREAM LOCAL
@@ -185,18 +192,168 @@ export function useWebRTC({
     prevParticipantsRef.current = participants;
   }, [participants, localUid]);
 
+  const monitorSpeaking = useCallback(
+    (
+      stream: MediaStream,
+      participantId: string
+    ) => {
+
+      if (
+        stream.getAudioTracks().length === 0
+      ) {
+        return () => {};
+      }
+
+      const audioContext =
+        new AudioContext();
+
+      const analyser =
+        audioContext.createAnalyser();
+
+      analyser.fftSize = 512;
+
+      const source =
+        audioContext.createMediaStreamSource(stream);
+
+      source.connect(analyser);
+
+      const data =
+        new Uint8Array(analyser.frequencyBinCount);
+
+      let animationId = 0;
+      const speakingThreshold = 12;
+
+      const checkVolume = () => {
+
+        analyser.getByteFrequencyData(data);
+
+        const average =
+          data.reduce((sum, value) => sum + value, 0) /
+          data.length;
+
+        setSpeakingParticipants((previous) => {
+
+          const next =
+            new Set(previous);
+
+          const isSpeaking =
+            average > speakingThreshold;
+
+          const wasSpeaking =
+            previous.has(participantId);
+
+          if (isSpeaking === wasSpeaking) {
+            return previous;
+          }
+
+          if (isSpeaking) {
+
+            next.add(participantId);
+
+          } else {
+
+            next.delete(participantId);
+
+          }
+
+          return next;
+        });
+
+        animationId =
+          requestAnimationFrame(checkVolume);
+
+      };
+
+      checkVolume();
+
+      return () => {
+
+        cancelAnimationFrame(animationId);
+
+        source.disconnect();
+
+        analyser.disconnect();
+
+        void audioContext.close();
+
+      };
+
+    },
+    []
+  );
+
+  useEffect(() => {
+
+    if (localStream) {
+
+      if (!speakingCleanups.current.has("local")) {
+
+        const cleanup =
+          monitorSpeaking(
+            localStream,
+            "local"
+          );
+
+        speakingCleanups.current.set(
+          "local",
+          cleanup
+        );
+
+      }
+
+    }
+
+    remoteStreams.forEach((stream, socketId) => {
+
+      if (
+        !speakingCleanups.current.has(socketId)
+      ) {
+
+        const cleanup =
+          monitorSpeaking(
+            stream,
+            socketId
+          );
+
+        speakingCleanups.current.set(
+          socketId,
+          cleanup
+        );
+
+      }
+
+    });
+
+    return () => {
+
+      speakingCleanups.current.forEach(
+        (cleanup) => cleanup()
+      );
+
+      speakingCleanups.current.clear();
+
+    };
+
+  }, [
+    localStream,
+    remoteStreams,
+    monitorSpeaking,
+  ]);
+
   // ─────────────────────────────────────────────────────────────
   // 4. CONTROLES AV
   // ─────────────────────────────────────────────────────────────
   const toggleMute = useCallback(() => {
     const newMuted = !isMuted;
     serviceRef.current?.updateTrackState("audio", !newMuted);
+    sendParticipantMediaState({ isMicrophoneOn: !newMuted });
     setIsMuted(newMuted);
   }, [isMuted]);
 
   const toggleCamera = useCallback(() => {
     const newOff = !isCameraOff;
     serviceRef.current?.updateTrackState("video", !newOff);
+    sendParticipantMediaState({ isCameraOn: !newOff });
     setIsCameraOff(newOff);
   }, [isCameraOff]);
 
@@ -205,6 +362,7 @@ export function useWebRTC({
     remoteStreams,
     isMuted,
     isCameraOff,
+    speakingParticipants,
     toggleMute,
     toggleCamera,
   };
