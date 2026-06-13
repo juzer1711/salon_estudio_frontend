@@ -38,6 +38,7 @@ export default function Room(): React.JSX.Element {
   const [showMenu, setShowMenu] = useState(false);
   const [editingRoom, setEditingRoom] = useState<StudyRoom | null>(null);
   const [deletingRoom, setDeletingRoom] = useState<StudyRoom | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -203,7 +204,7 @@ export default function Room(): React.JSX.Element {
           </header>
 
           {/* ── CONTENT: Video Grid + Chat ──────────────────────── */}
-          <section className="room-content">
+          <section className={`room-content ${!isChatOpen ? "room-content--chat-hidden" : ""}`}>
 
             {/* VIDEO GRID — pasa los streams remotos por socketId */}
             <VideoGrid
@@ -214,11 +215,13 @@ export default function Room(): React.JSX.Element {
               localAV={{ isMuted, isCameraOff }}
               onToggleMute={toggleMute}
               onToggleCamera={toggleCamera}
+              isChatOpen={isChatOpen}
+              onToggleChat={() => setIsChatOpen((prev) => !prev)}
               speakingParticipants={speakingParticipants}
             />
 
             {/* CHAT */}
-            <section className="room-chat" aria-label="Chat de la sala">
+            <section className="room-chat" aria-label="Chat de la sala" aria-hidden={!isChatOpen}>
               <div className="room-chat__messages" role="log" aria-live="polite">
                 {messages.length === 0 ? (
                   <div className="room-chat__empty">

@@ -1,6 +1,6 @@
 // src/components/VideoGrid/VideoGrid.tsx
 
-import { Mic, MicOff, Video, VideoOff } from "lucide-react";
+import { MessageSquare, Mic, MicOff, Video, VideoOff } from "lucide-react";
 import VideoCard from "./VideoCard";
 import type { Participant } from "../../types/socket";
 import "./VideoGrid.css";
@@ -20,6 +20,8 @@ interface VideoGridProps {
   speakingParticipants: Set<string>;
   onToggleMute: () => void;
   onToggleCamera: () => void;
+  isChatOpen: boolean;
+  onToggleChat: () => void;
 }
 
 export default function VideoGrid({
@@ -31,6 +33,8 @@ export default function VideoGrid({
   speakingParticipants,
   onToggleMute,
   onToggleCamera,
+  isChatOpen,
+  onToggleChat,
 }: VideoGridProps): React.JSX.Element {
   const totalCards = participants.length + 1;
 
@@ -95,6 +99,19 @@ export default function VideoGrid({
           }
           <span className="video-grid__control-label">
             {localAV.isCameraOff ? "Activar cam" : "Apagar cam"}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          className={`video-grid__control-btn video-grid__control-btn--chat ${isChatOpen ? "video-grid__control-btn--chat-open" : ""}`}
+          onClick={onToggleChat}
+          aria-label={isChatOpen ? "Ocultar chat" : "Mostrar chat"}
+          aria-pressed={isChatOpen}
+        >
+          <MessageSquare size={18} aria-hidden="true" />
+          <span className="video-grid__control-label">
+            {isChatOpen ? "Ocultar chat" : "Chat"}
           </span>
         </button>
       </div>
