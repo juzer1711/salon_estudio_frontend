@@ -11,6 +11,7 @@ interface VideoCardProps {
   isMuted?: boolean;
   isCameraOff?: boolean;
   isSpeaking?: boolean;
+  preview?: boolean;
 }
 
 const getInitial = (name: string): string =>
@@ -23,6 +24,7 @@ export default function VideoCard({
   isMuted = false,
   isCameraOff = false,
   isSpeaking = false,
+  preview = false,
 }: VideoCardProps): React.JSX.Element {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -77,8 +79,13 @@ export default function VideoCard({
       {/* FOOTER — nombre + indicadores AV */}
       <footer className="video-card__footer">
         <span className="video-card__name">
-          @{participant.username}
-          {isLocal && <span className="video-card__you-tag">tú</span>}
+          {preview ? "Vista previa" : `@${participant.username}`}
+
+          {isLocal && !preview && (
+            <span className="video-card__you-tag">
+              tú
+            </span>
+          )}
         </span>
 
         <div
@@ -115,7 +122,7 @@ export default function VideoCard({
       </footer>
 
       {/* LOCAL BADGE */}
-      {isLocal && (
+      {isLocal && !preview && (
         <div className="video-card__local-badge" aria-hidden="true">
           En vivo
         </div>

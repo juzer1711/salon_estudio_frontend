@@ -338,14 +338,14 @@ export default function Dashboard(): React.JSX.Element {
                       tabIndex={0}
                       aria-label={`Entrar a la sala ${room.name}`}
                       onClick={() =>
-                        navigate(`/room/${room.id}`)
+                        navigate(`/room-preview/${room.id}`)
                       }
                       onKeyDown={(e) => {
                         if (
                           e.key === "Enter" ||
                           e.key === " "
                         ) {
-                          navigate(`/room/${room.id}`);
+                          navigate(`/room-preview/${room.id}`);
                         }
                       }}
                     >
@@ -401,14 +401,14 @@ export default function Dashboard(): React.JSX.Element {
           tabIndex={0}
           aria-label={`Entrar a la sala ${room.name}`}
           onClick={() =>
-            navigate(`/room/${room.id}`)
+            navigate(`/room-preview/${room.id}`)
           }
           onKeyDown={(e) => {
             if (
               e.key === "Enter" ||
               e.key === " "
             ) {
-              navigate(`/room/${room.id}`);
+              navigate(`/room-preview/${room.id}`);
             }
           }}
         >

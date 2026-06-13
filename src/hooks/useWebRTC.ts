@@ -18,8 +18,10 @@ import { WebRtcService } from "../services/webRtcService";
 import type { Participant } from "../types/socket";
 
 interface UseWebRTCProps {
-  participants: Participant[];
-  localUid: string;
+    participants: Participant[];
+    localUid: string;
+    initialCameraOn?: boolean;
+    initialMicOn?: boolean;
 }
 
 interface UseWebRTCReturn {
@@ -33,14 +35,19 @@ interface UseWebRTCReturn {
 }
 
 export function useWebRTC({
-  participants,
-  localUid,
+    participants,
+    localUid,
+    initialCameraOn = true,
+    initialMicOn = true,
 }: UseWebRTCProps): UseWebRTCReturn {
 
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(new Map());
-  const [isMuted, setIsMuted] = useState(false);
-  const [isCameraOff, setIsCameraOff] = useState(false);
+  const [isMuted, setIsMuted] =
+    useState(!initialMicOn);
+
+  const [isCameraOff, setIsCameraOff] =
+      useState(!initialCameraOn);
 
   const [speakingParticipants, setSpeakingParticipants] =
     useState<Set<string>>(new Set());
@@ -82,6 +89,13 @@ export function useWebRTC({
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
+        stream.getAudioTracks().forEach(track => {
+            track.enabled = initialMicOn;
+        });
+
+        stream.getVideoTracks().forEach(track => {
+            track.enabled = initialCameraOn;
+        });
         service.setLocalStream(stream);
         setLocalStream(stream);
         console.log("[WebRTC] Stream local obtenido ✓");
