@@ -201,10 +201,7 @@ export default function Rooms(): React.JSX.Element {
     "success"
   );
 
-  navigate(
-    `/room/${foundRoom.id}`
-  );
-
+  navigate(`/room-preview/${foundRoom.id}`);
     setFoundRoom(null);
   };
 
@@ -469,7 +466,7 @@ const canEnter =
                   <button
                     type="button"
                     onClick={() =>
-                      navigate(`/room/${foundRoom.id}`)
+                      navigate(`/room-preview/${foundRoom.id}`)
                     }
                     className="rooms-found__enter"
                   >

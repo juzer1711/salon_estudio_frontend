@@ -185,7 +185,7 @@ export default function RoomCard({
       <button
         className="room-card__button"
         aria-label={`Entrar a la sala ${room.name}`}
-        onClick={() => navigate(`/room/${room.id}`)}
+        onClick={() => navigate(`/room-preview/${room.id}`)}
       >
         Entrar
       </button>

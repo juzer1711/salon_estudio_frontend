@@ -11,6 +11,7 @@ import EditRoomModal from "../../components/modals/EditRoomModal";
 import DeleteRoomModal from "../../components/modals/DeleteRoomModal";
 import VideoGrid from "../../components/VideoGrid/VideoGrid";
 
+import { useLocation } from "react-router-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import type { StudyRoom } from "../../services/roomService";
 import AppLayout from "../../layouts/AppLayout";
@@ -24,6 +25,7 @@ import { useRoomStore } from "../../store/useRoomStore";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { formatTime } from "../../utils/formatDate";
 import "./Room.css";
+
 
 export default function Room(): React.JSX.Element {
   const { roomId } = useParams<{ roomId: string }>();
@@ -40,6 +42,13 @@ export default function Room(): React.JSX.Element {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const location = useLocation();
+
+  const previewState = location.state as {
+      isCameraOn?: boolean;
+      isMicOn?: boolean;
+  } | null;
 
   // ── Socket (chat + participantes) ────────────────────────────
   const {
@@ -72,6 +81,8 @@ export default function Room(): React.JSX.Element {
   } = useWebRTC({
     participants,
     localUid: profile?.uid ?? "",
+    initialCameraOn: previewState?.isCameraOn,
+    initialMicOn: previewState?.isMicOn,
   });
 
   const { searchRoomById, editRoom, removeRoom } = useRoomStore();

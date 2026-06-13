@@ -19,6 +19,8 @@ import Profile from "../../pages/Profile/Profile.tsx";
 import Room from "../../pages/Room/Room.tsx";
 import MyRooms from "../../pages/MyRooms/MyRooms.tsx";
 
+import RoomPreview from "../../components/RoomPreview/RoomPreview";
+
 import ChooseUsername from "../../pages/ChooseUsername/ChooseUsername";
 
 
@@ -114,6 +116,10 @@ export const router = createBrowserRouter([
       {
         path: "/rooms",
         element: <Rooms />,
+      },
+      {
+        path: "/room-preview/:roomId",
+        element: <RoomPreview />,
       },
       {
         path: "/room/:roomId",

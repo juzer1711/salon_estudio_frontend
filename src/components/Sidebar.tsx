@@ -179,7 +179,7 @@ export default function Sidebar({
 
                 <NavLink
                   key={room.id}
-                  to={`/room/${room.id}`}
+                  to={`/room-preview/${room.id}`}
                   onClick={onClose}
                   className="sidebar__room-link"
                 >
@@ -220,7 +220,7 @@ export default function Sidebar({
 
                 <NavLink
                   key={room.id}
-                  to={`/room/${room.id}`}
+                  to={`/room-preview/${room.id}`}
                   onClick={onClose}
                   className="sidebar__room-link"
                 >
