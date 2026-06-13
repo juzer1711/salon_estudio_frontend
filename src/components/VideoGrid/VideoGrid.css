@@ -274,6 +274,18 @@
   color: #fee2e2;
 }
 
+.video-grid__control-btn--chat-open {
+  background: rgba(124, 58, 237, 0.18);
+  border-color: rgba(124, 58, 237, 0.35);
+  color: #ddd6fe;
+}
+
+.video-grid__control-btn--chat-open:hover {
+  background: rgba(124, 58, 237, 0.28);
+  border-color: rgba(124, 58, 237, 0.5);
+  color: #f5f3ff;
+}
+
 .video-grid__control-label {
   font-size: 0.75rem;
 }
