@@ -17,6 +17,7 @@ export interface WebRtcServiceCallbacks {
 
 export class WebRtcService {
   private peers = new Map<string, RTCPeerConnection>();
+  private videoSenders = new Map<string, RTCRtpSender>();
   private localStream: MediaStream | null = null;
   private callbacks: WebRtcServiceCallbacks;
 
@@ -46,7 +47,19 @@ export class WebRtcService {
     // Añadir tracks del stream local
     if (this.localStream) {
       this.localStream.getTracks().forEach((track) => {
-        pc.addTrack(track, this.localStream!);
+
+        const sender =
+          pc.addTrack(track, this.localStream!);
+
+        if (track.kind === "video") {
+
+          this.videoSenders.set(
+            remoteSocketId,
+            sender
+          );
+
+        }
+
       });
     }
 
@@ -232,11 +245,32 @@ export class WebRtcService {
   // MUTE / CAMERA
   // ─────────────────────────────────────────────────────────────
 
-  updateTrackState(kind: "audio" | "video", enabled: boolean): void {
+  updateTrackState(
+    kind: "audio" | "video",
+    enabled: boolean
+  ): void {
+
     if (!this.localStream) return;
-    this.localStream.getTracks()
+
+    this.localStream
+      .getTracks()
       .filter((t) => t.kind === kind)
-      .forEach((t) => { t.enabled = enabled; });
+      .forEach((t) => {
+
+        t.enabled = enabled;
+
+      });
+  }
+
+  replaceVideoTrack(
+    track: MediaStreamTrack
+  ): void {
+
+    this.videoSenders.forEach((sender) => {
+
+      sender.replaceTrack(track);
+
+    });
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -273,6 +307,7 @@ export class WebRtcService {
       pc.close();
       this.peers.delete(socketId);
     }
+    this.videoSenders.delete(socketId);
     this.iceCandidateQueue.delete(socketId);
   }
 

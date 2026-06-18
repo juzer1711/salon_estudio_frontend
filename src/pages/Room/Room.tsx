@@ -16,7 +16,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { StudyRoom } from "../../services/roomService";
 import AppLayout from "../../layouts/AppLayout";
 import Button from "../../components/ui/Button";
-import { MessageSquareOff, LogOut, MoreVertical } from "lucide-react";
+import { MessageSquareOff, MoreVertical } from "lucide-react";
 
 import { useRoomSocket } from "../../hooks/useRoomSocket";
 import { useWebRTC } from "../../hooks/useWebRTC";
@@ -77,6 +77,8 @@ export default function Room(): React.JSX.Element {
     isMuted,
     isCameraOff,
     speakingParticipants,
+    isScreenSharing,
+    toggleScreenShare,
     toggleMute,
     toggleCamera,
   } = useWebRTC({
@@ -134,6 +136,12 @@ export default function Room(): React.JSX.Element {
     inputRef.current?.focus();
   };
 
+  const handleLeaveRoom = () => {
+
+    navigate("/dashboard");
+
+  };
+
   // Participante local con la misma forma que Participant
   const localParticipant = {
     uid: profile.uid,
@@ -153,14 +161,6 @@ export default function Room(): React.JSX.Element {
           {/* ── HEADER ─────────────────────────────────────────── */}
           <header className="room__header">
             <div className="room__header-left">
-              <button
-                type="button"
-                className="room__back"
-                onClick={() => navigate("/rooms")}
-                aria-label="Salir de la sesión"
-              >
-                <LogOut size={16} /> Salir
-              </button>
               <div>
                 <div className="room__badge">Sala colaborativa</div>
                 <h1 className="room__title">
@@ -212,11 +212,23 @@ export default function Room(): React.JSX.Element {
               localParticipant={localParticipant}
               localStream={localStream}
               remoteStreams={remoteStreams}
-              localAV={{ isMuted, isCameraOff }}
+
+              localAV={{
+                  isMuted,
+                  isCameraOff,
+              }}
+
               onToggleMute={toggleMute}
               onToggleCamera={toggleCamera}
+
+              onToggleScreenShare={toggleScreenShare}
+              isScreenSharing={isScreenSharing}
+
+              onLeaveRoom={handleLeaveRoom}
+
               isChatOpen={isChatOpen}
-              onToggleChat={() => setIsChatOpen((prev) => !prev)}
+              onToggleChat={() => setIsChatOpen(prev => !prev)}
+
               speakingParticipants={speakingParticipants}
             />
 
