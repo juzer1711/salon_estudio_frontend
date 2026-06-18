@@ -95,3 +95,14 @@ export const sendParticipantMediaState = (data: {
 }): void => {
   socket.emit("participant-media-state", data);
 };
+
+export const sendScreenShareState = (
+  isScreenSharing: boolean
+): void => {
+
+  socket.emit(
+    "screen-share-state",
+    isScreenSharing
+  );
+
+};

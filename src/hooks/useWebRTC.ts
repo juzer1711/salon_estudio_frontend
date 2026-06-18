@@ -13,6 +13,7 @@ import {
   sendWebRtcAnswer,
   sendIceCandidate,
   sendParticipantMediaState,
+  sendScreenShareState,
 } from "../services/socket";
 import { WebRtcService } from "../services/webRtcService";
 import type { Participant } from "../types/socket";
@@ -27,11 +28,16 @@ interface UseWebRTCProps {
 interface UseWebRTCReturn {
   localStream: MediaStream | null;
   remoteStreams: Map<string, MediaStream>;
+
   isMuted: boolean;
   isCameraOff: boolean;
+  isScreenSharing: boolean;
+
   speakingParticipants: Set<string>;
+
   toggleMute: () => void;
   toggleCamera: () => void;
+  toggleScreenShare: () => Promise<void>;
 }
 
 export function useWebRTC({
@@ -43,11 +49,10 @@ export function useWebRTC({
 
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(new Map());
-  const [isMuted, setIsMuted] =
-    useState(!initialMicOn);
-
-  const [isCameraOff, setIsCameraOff] =
-      useState(!initialCameraOn);
+  const [isMuted, setIsMuted] = useState(!initialMicOn);
+  const [isCameraOff, setIsCameraOff] = useState(!initialCameraOn);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const cameraTrackRef = useRef<MediaStreamTrack | null>(null);
 
   const [speakingParticipants, setSpeakingParticipants] =
     useState<Set<string>>(new Set());
@@ -96,6 +101,7 @@ export function useWebRTC({
         stream.getVideoTracks().forEach(track => {
             track.enabled = initialCameraOn;
         });
+        cameraTrackRef.current = stream.getVideoTracks()[0] ?? null;
         service.setLocalStream(stream);
         setLocalStream(stream);
         console.log("[WebRTC] Stream local obtenido ✓");
@@ -371,13 +377,96 @@ export function useWebRTC({
     setIsCameraOff(newOff);
   }, [isCameraOff]);
 
+  const toggleScreenShare = useCallback(async () => {
+
+    if (!serviceRef.current || !localStream) return;
+
+    if (isScreenSharing) {
+
+      const cameraTrack = cameraTrackRef.current;
+
+      if (!cameraTrack) return;
+
+      serviceRef.current.replaceVideoTrack(cameraTrack);
+
+      setLocalStream(
+          new MediaStream([
+              ...localStream.getAudioTracks(),
+              cameraTrack,
+          ])
+      );
+
+      setIsScreenSharing(false);
+      sendScreenShareState(false);
+
+      return;
+    }
+
+    try {
+
+      const displayStream =
+        await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+        });
+
+      const screenTrack =
+        displayStream.getVideoTracks()[0];
+
+      serviceRef.current.replaceVideoTrack(screenTrack);
+
+      const cameraTrack =
+        cameraTrackRef.current;
+
+      if (!cameraTrack) return;
+
+      setLocalStream(
+        new MediaStream([
+          ...localStream.getAudioTracks(),
+          screenTrack,
+        ])
+      );
+
+      setIsScreenSharing(true);
+      sendScreenShareState(true);
+
+      screenTrack.onended = () => {
+
+        const cameraTrack = cameraTrackRef.current;
+
+        if (!cameraTrack) return;
+
+        serviceRef.current?.replaceVideoTrack(cameraTrack);
+
+        setLocalStream(
+            new MediaStream([
+                ...localStream.getAudioTracks(),
+                cameraTrack,
+            ])
+        );
+        setIsScreenSharing(false);
+        sendScreenShareState(false);
+      };
+
+    } catch (err) {
+
+      console.log("Compartir pantalla cancelado", err);
+
+    }
+
+  }, [
+    localStream,
+    isScreenSharing,
+  ]);
+
   return {
     localStream,
     remoteStreams,
     isMuted,
     isCameraOff,
+    isScreenSharing,
     speakingParticipants,
     toggleMute,
     toggleCamera,
+    toggleScreenShare,
   };
 }

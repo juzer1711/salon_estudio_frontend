@@ -12,6 +12,7 @@ interface VideoCardProps {
   isCameraOff?: boolean;
   isSpeaking?: boolean;
   preview?: boolean;
+  isScreenShare?: boolean;
 }
 
 const getInitial = (name: string): string =>
@@ -25,6 +26,7 @@ export default function VideoCard({
   isCameraOff = false,
   isSpeaking = false,
   preview = false,
+  isScreenShare = false,
 }: VideoCardProps): React.JSX.Element {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -41,7 +43,10 @@ export default function VideoCard({
     isLocal ? "video-card--local" : "",
     isCameraOff ? "video-card--no-camera" : "",
     isSpeaking ? "video-card--speaking" : "",
-  ].filter(Boolean).join(" ");
+    isScreenShare ? "video-card--screen-share" : "",
+  ]
+  .filter(Boolean)
+  .join(" ");
 
   return (
     <article
