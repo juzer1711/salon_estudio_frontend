@@ -4,7 +4,7 @@ import { MessageSquare, Mic, MicOff, Video, VideoOff } from "lucide-react";
 import VideoCard from "./VideoCard";
 import type { Participant } from "../../types/socket";
 import "./VideoGrid.css";
-import { MessageSquareOff, LogOut, MonitorUp, MoreVertical } from "lucide-react";
+import { LogOut, MonitorUp } from "lucide-react";
 
 
 interface LocalAVState {
