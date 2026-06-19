@@ -89,6 +89,7 @@ export default function VideoGrid({
                           screenSharer.isMicrophoneOn === false
                       }
                       isCameraOff={false}
+                      isScreenShare
                       isSpeaking={
                           speakingParticipants.has(
                               screenSharer.socketId

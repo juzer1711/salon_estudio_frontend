@@ -1,10 +1,27 @@
 // src/services/webRtcService.ts
 
+const TURN_URL = import.meta.env.VITE_TURN_URL;
+const TURN_USERNAME = import.meta.env.VITE_TURN_USERNAME;
+const TURN_CREDENTIAL = import.meta.env.VITE_TURN_CREDENTIAL;
+
+const iceServers: RTCIceServer[] = [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+];
+
+const hasTurnServer = Boolean(TURN_URL && TURN_USERNAME && TURN_CREDENTIAL);
+
+if (hasTurnServer) {
+  iceServers.push({
+    urls: TURN_URL,
+    username: TURN_USERNAME,
+    credential: TURN_CREDENTIAL,
+  });
+}
+
 const ICE_SERVERS: RTCConfiguration = {
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:stun1.l.google.com:19302" },
-  ],
+  iceServers,
+  iceTransportPolicy: hasTurnServer ? "relay" : "all",
 };
 
 export interface WebRtcServiceCallbacks {

@@ -51,6 +51,12 @@ export default function Room(): React.JSX.Element {
       isMicOn?: boolean;
   } | null;
 
+  const initialCameraOn =
+    previewState?.isCameraOn ?? true;
+
+  const initialMicOn =
+    previewState?.isMicOn ?? true;
+
   // ── Socket (chat + participantes) ────────────────────────────
   const {
     messages,
@@ -62,6 +68,8 @@ export default function Room(): React.JSX.Element {
     uid: profile?.uid ?? "",
     username: profile?.username ?? "",
     avatarUrl: profile?.avatarUrl ?? "",
+    initialCameraOn,
+    initialMicOn,
     onParticipantJoined: (username) =>
       showSnackbar(`${username} se unió a la sala 👋`, "success"),
     onParticipantLeft: (username) =>
@@ -84,8 +92,8 @@ export default function Room(): React.JSX.Element {
   } = useWebRTC({
     participants,
     localUid: profile?.uid ?? "",
-    initialCameraOn: previewState?.isCameraOn,
-    initialMicOn: previewState?.isMicOn,
+    initialCameraOn,
+    initialMicOn,
   });
 
   const { searchRoomById, editRoom, removeRoom } = useRoomStore();
@@ -148,6 +156,9 @@ export default function Room(): React.JSX.Element {
     username: profile.username,
     avatarUrl: profile.avatarUrl ?? "",
     socketId: "local",
+    isCameraOn: !isCameraOff,
+    isMicrophoneOn: !isMuted,
+    isScreenSharing,
   };
 
   // Participantes remotos = todos salvo el usuario actual

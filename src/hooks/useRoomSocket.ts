@@ -24,6 +24,8 @@ interface UseRoomSocketProps {
   uid: string;
   username: string;
   avatarUrl?: string;
+  initialCameraOn?: boolean;
+  initialMicOn?: boolean;
   onParticipantJoined?: (username: string) => void;
   onParticipantLeft?: (username: string) => void;
 }
@@ -33,6 +35,8 @@ export function useRoomSocket({
   uid,
   username,
   avatarUrl,
+  initialCameraOn = true,
+  initialMicOn = true,
   onParticipantJoined,
   onParticipantLeft,
 }: UseRoomSocketProps) {
@@ -66,8 +70,8 @@ export function useRoomSocket({
         uid,
         username,
         avatarUrl,
-        isCameraOn: true,
-        isMicrophoneOn: true,
+        isCameraOn: initialCameraOn,
+        isMicrophoneOn: initialMicOn,
       });
 
       getChatHistory(roomId);
@@ -138,7 +142,14 @@ export function useRoomSocket({
       socket.disconnect();
     };
 
-  }, [roomId, uid, username, avatarUrl]);
+  }, [
+    roomId,
+    uid,
+    username,
+    avatarUrl,
+    initialCameraOn,
+    initialMicOn,
+  ]);
 
   const sendChatMessage = (text: string): void => {
 
