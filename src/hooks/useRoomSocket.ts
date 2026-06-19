@@ -24,6 +24,8 @@ interface UseRoomSocketProps {
   uid: string;
   username: string;
   avatarUrl?: string;
+  isCameraOn?: boolean;      // FIX: recibir el estado real de media
+  isMicrophoneOn?: boolean;  // FIX: recibir el estado real de media
   onParticipantJoined?: (username: string) => void;
   onParticipantLeft?: (username: string) => void;
 }
@@ -33,6 +35,8 @@ export function useRoomSocket({
   uid,
   username,
   avatarUrl,
+  isCameraOn = true,       // FIX: usar el valor real, no hardcodeado
+  isMicrophoneOn = true,   // FIX: usar el valor real, no hardcodeado
   onParticipantJoined,
   onParticipantLeft,
 }: UseRoomSocketProps) {
@@ -46,32 +50,38 @@ export function useRoomSocket({
   const [isConnected, setIsConnected] =
     useState(false);
 
-  /**
-   * Guardamos la lista previa de participantes para detectar
-   * quién entró o salió comparando con el update nuevo.
-   */
   const prevParticipantsRef =
     useRef<Participant[]>([]);
 
   useEffect(() => {
 
-    socket.connect();
-
-    socket.on("connect", () => {
-
+    // FIX Bug 1 — Race condition:
+    // Si el socket ya está conectado cuando montamos el componente,
+    // el evento "connect" nunca disparará. Hay que llamar joinRoom
+    // directamente en ese caso, además de registrar el listener
+    // para futuros reconects.
+    const doJoin = () => {
       setIsConnected(true);
-
       joinRoom({
         roomId,
         uid,
         username,
         avatarUrl,
-        isCameraOn: true,
-        isMicrophoneOn: true,
+        isCameraOn,        // FIX Bug 3: usar el estado real
+        isMicrophoneOn,    // FIX Bug 3: usar el estado real
       });
-
       getChatHistory(roomId);
-    });
+    };
+
+    if (socket.connected) {
+      // Ya estaba conectado: unirse directamente
+      doJoin();
+    } else {
+      // No conectado: conectar y esperar el evento
+      socket.connect();
+    }
+
+    socket.on("connect", doJoin);
 
     socket.on("disconnect", () => {
       setIsConnected(false);
@@ -97,7 +107,6 @@ export function useRoomSocket({
 
         const prev = prevParticipantsRef.current;
 
-        // Detectar quién se unió (está en updated pero no en prev)
         if (prev.length > 0) {
 
           const joined = updated.filter(
@@ -109,7 +118,6 @@ export function useRoomSocket({
           );
 
           joined.forEach((p) => {
-            // No notificamos al propio usuario cuando él mismo entra
             if (p.uid !== uid) {
               onParticipantJoined?.(p.username);
             }
@@ -123,14 +131,13 @@ export function useRoomSocket({
         }
 
         prevParticipantsRef.current = updated;
-
         setParticipants(updated);
       }
     );
 
     return () => {
       leaveRoom();
-      socket.off("connect");
+      socket.off("connect", doJoin);
       socket.off("disconnect");
       socket.off("chat-history");
       socket.off("receive-message");
@@ -138,12 +145,12 @@ export function useRoomSocket({
       socket.disconnect();
     };
 
-  }, [roomId, uid, username, avatarUrl]);
+  // FIX: roomId y uid son los únicos que deben disparar reconexión.
+  // username/avatarUrl pueden cambiar sin necesitar rehacer todo el socket.
+  }, [roomId, uid]);
 
   const sendChatMessage = (text: string): void => {
-
     if (!text.trim()) return;
-
     sendMessage({
       roomId,
       userUid: uid,
