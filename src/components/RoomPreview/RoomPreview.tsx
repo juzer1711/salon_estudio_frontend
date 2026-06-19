@@ -28,6 +28,8 @@ export default function RoomPreview() {
 
     useEffect(() => {
 
+        let previewStream: MediaStream | null = null;
+
         const startCamera = async () => {
 
             try {
@@ -37,6 +39,8 @@ export default function RoomPreview() {
                         video: true,
                         audio: true,
                     });
+
+                previewStream = mediaStream;
 
                 setStream(mediaStream);
 
@@ -52,13 +56,15 @@ export default function RoomPreview() {
 
         return () => {
 
-            stream?.getTracks().forEach(track => track.stop());
+            previewStream?.getTracks().forEach(track => track.stop());
 
         };
 
     }, []);
 
     const handleJoin = () => {
+
+        stream?.getTracks().forEach(track => track.stop());
 
         navigate(`/room/${roomId}`, {
         state: {

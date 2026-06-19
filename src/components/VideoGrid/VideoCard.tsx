@@ -29,12 +29,39 @@ export default function VideoCard({
   isScreenShare = false,
 }: VideoCardProps): React.JSX.Element {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Attach the MediaStream to the <video> element when stream changes
+  // Keep video and remote audio attached separately so hiding video never kills audio.
   useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
+    const videoElement = videoRef.current;
+    const audioElement = audioRef.current;
+
+    if (videoElement) {
+      videoElement.srcObject = stream;
+      void videoElement.play().catch(() => undefined);
     }
+
+    if (audioElement) {
+      const audioTracks = stream?.getAudioTracks() ?? [];
+      audioElement.srcObject =
+        audioTracks.length > 0
+          ? new MediaStream(audioTracks)
+          : null;
+
+      if (audioElement.srcObject) {
+        void audioElement.play().catch(() => undefined);
+      }
+    }
+
+    return () => {
+      if (videoElement) {
+        videoElement.srcObject = null;
+      }
+
+      if (audioElement) {
+        audioElement.srcObject = null;
+      }
+    };
   }, [stream]);
 
   const showVideo = !!stream && !isCameraOff;
@@ -59,9 +86,18 @@ export default function VideoCard({
         className={`video-card__video ${showVideo ? "" : "video-card__video--hidden"}`}
         autoPlay
         playsInline
-        muted={isLocal} // El propio audio no se escucha localmente
+        muted
         aria-hidden="true"
       />
+
+      {!isLocal && (
+        <audio
+          ref={audioRef}
+          autoPlay
+          playsInline
+          aria-hidden="true"
+        />
+      )}
 
       {/* AVATAR FALLBACK — visible cuando no hay stream o cámara apagada */}
       {!showVideo && (
