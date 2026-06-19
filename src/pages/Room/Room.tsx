@@ -160,6 +160,9 @@ export default function Room(): React.JSX.Element {
     username:  profile.username,
     avatarUrl: profile.avatarUrl ?? "",
     socketId:  "",   // el local nunca tiene socketId del servidor
+    isCameraOn: !isCameraOff,
+    isMicrophoneOn: !isMuted,
+    isScreenSharing,
   };
 
   // Participantes remotos = todos salvo el usuario actual
