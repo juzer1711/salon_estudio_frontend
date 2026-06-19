@@ -24,6 +24,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useRoomStore } from "../../store/useRoomStore";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { formatTime } from "../../utils/formatDate";
+import { leaveRoom } from "../../services/socket";
 import "./Room.css";
 
 
@@ -47,15 +48,13 @@ export default function Room(): React.JSX.Element {
   const location = useLocation();
 
   const previewState = location.state as {
-      isCameraOn?: boolean;
-      isMicOn?: boolean;
+    isCameraOn?: boolean;
+    isMicOn?: boolean;
   } | null;
 
-  const initialCameraOn =
-    previewState?.isCameraOn ?? true;
-
-  const initialMicOn =
-    previewState?.isMicOn ?? true;
+  // Valores reales de media desde la pantalla de preview
+  const initialCameraOn = previewState?.isCameraOn ?? true;
+  const initialMicOn    = previewState?.isMicOn    ?? true;
 
   // ── Socket (chat + participantes) ────────────────────────────
   const {
@@ -64,12 +63,13 @@ export default function Room(): React.JSX.Element {
     isConnected,
     sendChatMessage,
   } = useRoomSocket({
-    roomId: roomId ?? "",
-    uid: profile?.uid ?? "",
-    username: profile?.username ?? "",
-    avatarUrl: profile?.avatarUrl ?? "",
-    initialCameraOn,
-    initialMicOn,
+    roomId:        roomId  ?? "",
+    uid:           profile?.uid      ?? "",
+    username:      profile?.username ?? "",
+    avatarUrl:     profile?.avatarUrl ?? "",
+    // FIX Bug 2: pasar el estado real de media al socket
+    isCameraOn:    initialCameraOn,
+    isMicrophoneOn: initialMicOn,
     onParticipantJoined: (username) =>
       showSnackbar(`${username} se unió a la sala 👋`, "success"),
     onParticipantLeft: (username) =>
@@ -77,8 +77,6 @@ export default function Room(): React.JSX.Element {
   });
 
   // ── WebRTC (cámara, micrófono, peers) ────────────────────────
-  // Recibe la misma lista `participants` del socket y
-  // crea/destruye RTCPeerConnections automáticamente
   const {
     localStream,
     remoteStreams,
@@ -91,7 +89,7 @@ export default function Room(): React.JSX.Element {
     toggleCamera,
   } = useWebRTC({
     participants,
-    localUid: profile?.uid ?? "",
+    localUid:      profile?.uid ?? "",
     initialCameraOn,
     initialMicOn,
   });
@@ -99,18 +97,9 @@ export default function Room(): React.JSX.Element {
   const { searchRoomById, editRoom, removeRoom } = useRoomStore();
   const isOwner = profile?.uid === currentRoom?.ownerUid;
 
-  if (!roomId || !profile) {
-    return (
-      <AppLayout>
-        <main className="room">
-          <p>Cargando sala...</p>
-        </main>
-      </AppLayout>
-    );
-  }
-
   // ── Cargar sala ───────────────────────────────────────────────
   useEffect(() => {
+    if (!roomId) return;
     const loadRoom = async () => {
       const room = await searchRoomById(roomId);
       if (!room) { navigate("/rooms"); return; }
@@ -144,21 +133,33 @@ export default function Room(): React.JSX.Element {
     inputRef.current?.focus();
   };
 
+  // FIX Bug 4: emitir "leave-room" al servidor antes de navegar
   const handleLeaveRoom = () => {
-
+    leaveRoom();
     navigate("/dashboard");
-
   };
 
-  // Participante local con la misma forma que Participant
+  // FIX Bug 1: el early return va AL FINAL, después de todos los hooks.
+  // Antes estaba en medio del componente, lo que causaba que los hooks
+  // se ejecutaran condicionalmente — violación de las reglas de React.
+  if (!roomId || !profile) {
+    return (
+      <AppLayout>
+        <main className="room">
+          <p>Cargando sala...</p>
+        </main>
+      </AppLayout>
+    );
+  }
+
+  // FIX Bug 3: el participante local usa socketId vacío o undefined,
+  // no el string "local", para no colisionar con la lógica de remoteStreams.
+  // VideoGrid debe tratar socketId vacío como "soy yo".
   const localParticipant = {
-    uid: profile.uid,
-    username: profile.username,
+    uid:       profile.uid,
+    username:  profile.username,
     avatarUrl: profile.avatarUrl ?? "",
-    socketId: "local",
-    isCameraOn: !isCameraOff,
-    isMicrophoneOn: !isMuted,
-    isScreenSharing,
+    socketId:  "",   // el local nunca tiene socketId del servidor
   };
 
   // Participantes remotos = todos salvo el usuario actual
@@ -181,7 +182,13 @@ export default function Room(): React.JSX.Element {
                   Comunicación en tiempo real mediante WebSockets.
                 </p>
                 <div className="room__connection" aria-live="polite">
-                  <span className={`room__connection-dot ${isConnected ? "room__connection-dot--on" : "room__connection-dot--off"}`} />
+                  <span
+                    className={`room__connection-dot ${
+                      isConnected
+                        ? "room__connection-dot--on"
+                        : "room__connection-dot--off"
+                    }`}
+                  />
                   {isConnected ? "Conectado" : "Desconectado"}
                 </div>
               </div>
@@ -203,10 +210,16 @@ export default function Room(): React.JSX.Element {
               )}
               {showMenu && (
                 <div className="room__menu">
-                  <button className="room__menu-item" onClick={() => { setShowMenu(false); setEditingRoom(currentRoom); }}>
+                  <button
+                    className="room__menu-item"
+                    onClick={() => { setShowMenu(false); setEditingRoom(currentRoom); }}
+                  >
                     Editar sala
                   </button>
-                  <button className="room__menu-item room__menu-item--danger" onClick={() => { setShowMenu(false); setDeletingRoom(currentRoom); }}>
+                  <button
+                    className="room__menu-item room__menu-item--danger"
+                    onClick={() => { setShowMenu(false); setDeletingRoom(currentRoom); }}
+                  >
                     Eliminar sala
                   </button>
                 </div>
@@ -215,37 +228,39 @@ export default function Room(): React.JSX.Element {
           </header>
 
           {/* ── CONTENT: Video Grid + Chat ──────────────────────── */}
-          <section className={`room-content ${!isChatOpen ? "room-content--chat-hidden" : ""}`}>
+          <section
+            className={`room-content ${
+              !isChatOpen ? "room-content--chat-hidden" : ""
+            }`}
+          >
 
-            {/* VIDEO GRID — pasa los streams remotos por socketId */}
             <VideoGrid
               participants={remoteParticipants}
               localParticipant={localParticipant}
               localStream={localStream}
               remoteStreams={remoteStreams}
-
-              localAV={{
-                  isMuted,
-                  isCameraOff,
-              }}
-
+              localAV={{ isMuted, isCameraOff }}
               onToggleMute={toggleMute}
               onToggleCamera={toggleCamera}
-
               onToggleScreenShare={toggleScreenShare}
               isScreenSharing={isScreenSharing}
-
               onLeaveRoom={handleLeaveRoom}
-
               isChatOpen={isChatOpen}
-              onToggleChat={() => setIsChatOpen(prev => !prev)}
-
+              onToggleChat={() => setIsChatOpen((prev) => !prev)}
               speakingParticipants={speakingParticipants}
             />
 
             {/* CHAT */}
-            <section className="room-chat" aria-label="Chat de la sala" aria-hidden={!isChatOpen}>
-              <div className="room-chat__messages" role="log" aria-live="polite">
+            <section
+              className="room-chat"
+              aria-label="Chat de la sala"
+              aria-hidden={!isChatOpen}
+            >
+              <div
+                className="room-chat__messages"
+                role="log"
+                aria-live="polite"
+              >
                 {messages.length === 0 ? (
                   <div className="room-chat__empty">
                     <MessageSquareOff size={48} strokeWidth={1.5} />
@@ -254,27 +269,46 @@ export default function Room(): React.JSX.Element {
                   </div>
                 ) : (
                   messages.map((chat, index) => {
-                    const isOwn = chat.username === profile.username;
-                    const isConsecutive = messages[index - 1]?.username === chat.username;
+                    const isOwn         = chat.username === profile.username;
+                    const isConsecutive =
+                      messages[index - 1]?.username === chat.username;
 
                     return (
                       <article
                         key={`${chat.userUid}-${chat.createdAt}-${index}`}
-                        className={`room-message ${isOwn ? "room-message--own" : "room-message--other"} ${isConsecutive ? "room-message--consecutive" : ""}`}
+                        className={`room-message ${
+                          isOwn
+                            ? "room-message--own"
+                            : "room-message--other"
+                        } ${isConsecutive ? "room-message--consecutive" : ""}`}
                         aria-label={`Mensaje de ${chat.username}`}
                       >
-                        <div className={`room-message__avatar ${isConsecutive ? "room-message__avatar--hidden" : ""}`} aria-hidden="true">
+                        <div
+                          className={`room-message__avatar ${
+                            isConsecutive ? "room-message__avatar--hidden" : ""
+                          }`}
+                          aria-hidden="true"
+                        >
                           {!isConsecutive && (
                             chat.avatarUrl
-                              ? <img src={chat.avatarUrl} alt={chat.username} className="room-message__avatar-image" referrerPolicy="no-referrer" />
+                              ? <img
+                                  src={chat.avatarUrl}
+                                  alt={chat.username}
+                                  className="room-message__avatar-image"
+                                  referrerPolicy="no-referrer"
+                                />
                               : <span>{chat.username?.[0]?.toUpperCase() ?? "?"}</span>
                           )}
                         </div>
                         <div className="room-message__content">
                           {!isConsecutive && (
                             <div className="room-message__header">
-                              <span className="room-message__user">@{chat.username}</span>
-                              <span className="room-message__time">{formatTime(chat.createdAt)}</span>
+                              <span className="room-message__user">
+                                @{chat.username}
+                              </span>
+                              <span className="room-message__time">
+                                {formatTime(chat.createdAt)}
+                              </span>
                             </div>
                           )}
                           <p className="room-message__text">{chat.message}</p>
@@ -301,7 +335,11 @@ export default function Room(): React.JSX.Element {
                   className="room-chat__input"
                   aria-label="Campo de mensaje"
                 />
-                <Button type="submit" disabled={!message.trim()} aria-label="Enviar mensaje">
+                <Button
+                  type="submit"
+                  disabled={!message.trim()}
+                  aria-label="Enviar mensaje"
+                >
                   Enviar
                 </Button>
               </form>
