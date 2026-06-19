@@ -86,14 +86,16 @@ export default function VideoGrid({
                             : remoteStreams.get(screenSharer.socketId) ?? null
                       }
                       isMuted={
-                          screenSharer.isMicrophoneOn === false
+                          screenSharer.socketId === localParticipant?.socketId
+                              ? localAV.isMuted
+                              : screenSharer.isMicrophoneOn === false
                       }
                       isCameraOff={false}
                       isScreenShare
                       isSpeaking={
-                          speakingParticipants.has(
-                              screenSharer.socketId
-                          )
+                          screenSharer.socketId === localParticipant?.socketId
+                              ? speakingParticipants.has("local")
+                              : speakingParticipants.has(screenSharer.socketId)
                       }
                   />
 
