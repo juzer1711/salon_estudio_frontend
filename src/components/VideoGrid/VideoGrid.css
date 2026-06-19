@@ -18,6 +18,7 @@
   backdrop-filter: blur(20px);
   height: 100%;
   min-height: 340px;
+  min-width: 0;
   /* Padding bottom para dejar espacio a los controles */
   padding-bottom: 5.5rem;
 }
@@ -76,6 +77,9 @@
   border: 2px solid rgba(255,255,255,.05);
 
   aspect-ratio: 16 / 9;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
 
   display: flex;
   align-items: center;
@@ -103,6 +107,17 @@
 
 .video-card--no-camera {
   background: rgba(10, 15, 28, 0.9);
+}
+
+.video-grid--count-3 .video-card,
+.video-grid--count-4 .video-card,
+.video-grid--count-5 .video-card,
+.video-grid--count-6 .video-card,
+.video-grid--count-7 .video-card,
+.video-grid--count-8 .video-card,
+.video-grid--count-9 .video-card {
+  height: 100%;
+  aspect-ratio: auto;
 }
 
 /* ---- VIDEO ELEMENT ---- */
@@ -388,6 +403,8 @@
     gap:1rem;
 
     height:100%;
+    min-height:340px;
+    min-width:0;
 
     padding:1rem;
     padding-bottom:5.5rem;
@@ -409,6 +426,7 @@
     align-items:center;
 
     min-width:0;
+    min-height:0;
 }
 
 .presentation-layout__screen .video-card{
@@ -431,6 +449,8 @@
     overflow-y:auto;
 
     padding-right:.25rem;
+    min-width:0;
+    min-height:0;
 }
 
 .presentation-layout__participants .video-card{
@@ -440,4 +460,43 @@
     aspect-ratio:16/9;
 
     flex-shrink:0;
+}
+
+@media (max-width: 900px) {
+  .presentation-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(280px, 1fr) auto;
+    gap: 0.75rem;
+  }
+
+  .presentation-layout__participants {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-right: 0;
+    padding-bottom: 0.25rem;
+  }
+
+  .presentation-layout__participants .video-card {
+    width: min(42vw, 220px);
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 600px) {
+  .presentation-layout {
+    min-height: 560px;
+    padding: 0.6rem;
+    padding-bottom: 5rem;
+    grid-template-rows: minmax(320px, 1fr) auto;
+  }
+
+  .presentation-layout__screen .video-card {
+    min-height: 320px;
+  }
+
+  .presentation-layout__participants .video-card {
+    width: 46vw;
+    min-width: 148px;
+  }
 }
